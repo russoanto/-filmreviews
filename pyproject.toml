@@ -6,6 +6,7 @@ authors = ["chx56 <russoantonio451@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+Whoosh = "^2.7.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
