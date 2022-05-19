@@ -28,5 +28,5 @@ class tomatoes:
 
 test = tomatoes()
 
-for i in test.movie_reviews("spiderman"):
+for i in test.movie_reviews(input("Inserire nome film: ")):
     print(i)
