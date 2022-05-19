@@ -7,5 +7,6 @@ from whoosh.searching import Searcher
 
 
 
-
+def main():
+    print("vciao")
 
