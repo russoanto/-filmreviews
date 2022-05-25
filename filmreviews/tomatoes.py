@@ -1,10 +1,12 @@
 import requests
 import json
 from bs4 import BeautifulSoup
+import index_gen
 
 
 class tomatoes:
     url = "https://www.rottentomatoes.com/m/"
+    path_index = index_gen.get_path()
 
     def movie_info(self, name:str) -> str:
         desc = ""
