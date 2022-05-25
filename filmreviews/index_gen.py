@@ -84,13 +84,14 @@ def index_json(id_gen):
     output_file.close()
 
 
-def create_index() -> None:
+def create_index() -> int:
     id_gen = id_generator()
     with open(PATH,'w') as f:
         pass
     alpha_string = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','numbers']
-    download_movies(['A','B'])
+    download_movies(alpha_string)
     index_json(id_gen)
+    return next(id_gen)-1
     #save_result(str(films))
 
-create_index()
+#create_index()
