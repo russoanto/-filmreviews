@@ -7,6 +7,7 @@ import index_gen
 class tomatoes:
     url = "https://www.rottentomatoes.com/m/"
     path_index = index_gen.get_path()
+    num_film = index_gen.create_index()
 
     def movie_info(self, name:str) -> str:
         desc = ""
@@ -29,6 +30,10 @@ class tomatoes:
         return reviews
 
 test = tomatoes()
-
-for i in test.movie_reviews(input("Inserire nome film: ")):
-    print(i)
+with open(test.path_index) as json_file:
+    data = json.load(json_file)
+    for i in range(test.num_film):
+        for j in data[str(i)]["name"]:
+            print(test.movie_info(j))
+#for i in test.movie_reviews(input("Inserire nome film: ")):
+    #print(i)
