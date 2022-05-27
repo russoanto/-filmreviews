@@ -17,8 +17,7 @@ class tomatoes:
 
     def movie_info(self, name:str) -> str:
         desc = ""
-        film_name = tomatoes.format_name(name)
-        req = requests.get(self.url+str(film_name))
+        req = requests.get(self.url+str(name))
         if req.status_code != 404:
             soup = BeautifulSoup(req.content, 'html.parser') 
             for i in soup.find_all('div', class_="movie_synopsis clamp clamp-6 js-clamp"):
@@ -27,8 +26,10 @@ class tomatoes:
         return "not_exists : " + name
     
     def movie_reviews(self, name:str):
+        
         reviews = []
-        req = requests.get(self.url+str(name)+"/reviews/")
+        req = requests.get(self.url+name+"/reviews/")
+        print(name + ": "+ self.url+str(name)+"/reviews/")
         if req.status_code != 404:
             soup = BeautifulSoup(req.content, 'html.parser')
             for i in soup.find_all('div', class_="review_desc"):
@@ -40,33 +41,34 @@ class tomatoes:
                 reviews.append(review)
         else:
             print("not_exists")
+        
+        with open('./index/reviews.txt','a') as openfile:
+            openfile.write(name + ": " + str(reviews)+"\n")
         return reviews
-
-
     #
     # ritorna la descrizione di tutti i film raccolti dall'indice creato
     #
     def get_movies_info(self,data, type_mode=0):
         with futures.ThreadPoolExecutor(max_workers=10) as executor:
             to_do = []
-            for i in range(self.num_film):
+            for i in range(int(self.num_film)):
                     film_name = tomatoes.format_name(data[str(i)]["name"])
 
                     if type_mode == 0:
-                        future = executor.submit(self.movie_info,data[str(i)]["name"])
+                        future = executor.submit(self.movie_info,film_name)
                     else:
-                        future = executor.submit(self.movie_reviews,data[str(i)]["name"])
+                        future = executor.submit(self.movie_reviews,film_name)
 
                     to_do.append(future)
                     msg = 'Scheduled for {}: {}'
                     print(msg.format(film_name, future))
 
             results = []
+
             for future in futures.as_completed(to_do):
                 res = future.result()
-                #print(msg.format(future,res))
-                if(not res.find('not_exists')):
-                    results.append(res)
+                print(msg.format(future,res))                
+                results.append(res)
             return results
 
     @staticmethod
@@ -75,14 +77,12 @@ class tomatoes:
         film_name = film_name.replace(' ','_')
         film_name = film_name.replace('\'','')
         film_name = film_name.replace('-', '_')
-        return film_name
+        return str(film_name)
 
     def test_iter(self,data):
-        for i in range(self.num_film):
-            film_name = data[str(i)]["name"]
-            film_name = film_name.lower()
-            film_name = film_name.replace(' ','_')
-            print(self.movie_info(film_name))
+        for i in range(int(self.num_film)):
+            film_name = tomatoes.format_name(data[str(i)]["name"])
+            self.movie_reviews(film_name)
 
 
 #test = tomatoes()
