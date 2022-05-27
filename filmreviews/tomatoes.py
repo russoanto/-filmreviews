@@ -14,10 +14,13 @@ class tomatoes:
         self.num_film = num_film
         self.url = url
 
+
     def movie_info(self, name:str) -> str:
         desc = ""
-        if requests.get(self.url+str(name)).status_code != 404:
-            soup = BeautifulSoup(requests.get(self.url+str(name)).content, 'html.parser') 
+        film_name = tomatoes.format_name(name)
+        req = requests.get(self.url+str(film_name))
+        if req.status_code != 404:
+            soup = BeautifulSoup(req.content, 'html.parser') 
             for i in soup.find_all('div', class_="movie_synopsis clamp clamp-6 js-clamp"):
                 desc += i.get_text() 
             return desc
@@ -47,9 +50,7 @@ class tomatoes:
         with futures.ThreadPoolExecutor(max_workers=10) as executor:
             to_do = []
             for i in range(self.num_film):
-                    film_name = data[str(i)]["name"]
-                    film_name = film_name.lower()
-                    film_name = film_name.replace(' ','_')
+                    film_name = tomatoes.format_name(data[str(i)]["name"])
 
                     if type_mode == 0:
                         future = executor.submit(self.movie_info,data[str(i)]["name"])
@@ -67,6 +68,14 @@ class tomatoes:
                 if(not res.find('not_exists')):
                     results.append(res)
             return results
+
+    @staticmethod
+    def format_name(name):
+        film_name = name.lower()
+        film_name = film_name.replace(' ','_')
+        film_name = film_name.replace('\'','')
+        film_name = film_name.replace('-', '_')
+        return film_name
 
     def test_iter(self,data):
         for i in range(self.num_film):
