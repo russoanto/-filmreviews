@@ -10,6 +10,7 @@ def main():
 
     with open(test.path_index) as json_file:
         data = json.load(json_file)
-        test.test_iter(data)
+        print(test.get_movies_info(data,2))
+    #print(test.movie_reviews('spiderman'))
     
 main()
