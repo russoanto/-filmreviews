@@ -3,15 +3,35 @@ import json
 from bs4 import BeautifulSoup
 from concurrent import futures
 import hashlib
+import os
 
 class index_film:
 
-    def __init__(self,url="https://en.wikipedia.org/wiki/List_of_films:_",path='./index/final_index.json', path_inter='./index/intermediate_index.txt',max=100000):
+    def __init__(self,url="https://en.wikipedia.org/wiki/List_of_films:_",path='./index/final_index.json', path_inter='./index/intermediate_index.txt',max=100000,num_film=0):
         self.URL = url
         self.PATH = path
         self.PATH_INTER = path_inter
         self.MAX_NUM= max
-        self.num_film = 0
+        self.num_film = num_film
+
+    
+    def save_index(self):
+        with open(self.save_path, "w") as openfile:
+            openfile.write(self.URL+" "+self.PATH+" "+self.PATH_INTER+" "+ str(self.MAX_NUM)+" "+str(self.num_film))
+
+    @staticmethod
+    def resume_index():
+        save_path = "./index/resume.txt"
+
+        if os.path.exists(save_path):
+            resume_file = open(save_path,'r')
+            line = resume_file.readline()
+            return line
+        else:
+            return None
+
+    def get_num_film(self):
+        return self.num_film
 
     def id_generator(self):
         for i in range(self.MAX_NUM):
