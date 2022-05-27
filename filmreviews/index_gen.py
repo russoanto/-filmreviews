@@ -22,22 +22,21 @@ class index_film:
 
     def save_result(self, response:str) -> None:
             with open(self.PATH_INTER, "a") as openfile:
-
                 openfile.write(response)
+
                 #for i in range(len(response["results"])):
                     #openfile.write('"' + response["results"][i]["id"] + '"' + ':' +  '"' + response["results"][i]["title"] + '"' +', \n')
 
 
     def select_movie(self,char:chr, URL:str) -> None:
-        self.URL += str(char)
-        soup = BeautifulSoup(requests.get(self.URL).content, 'html.parser')
+        url = self.URL + str(char)
+        soup = BeautifulSoup(requests.get(url).content, 'html.parser')
         for i in soup.find_all('div', class_="div-col"):
             self.save_result(i.get_text())
             #films.add(i.get_text())
 
 
     def download_movies(self,ranges:list[str]) -> int :
-            print(ranges)
             with futures.ThreadPoolExecutor(max_workers=10) as executor:
                 to_do = []
                 for letter in ranges:
@@ -66,8 +65,9 @@ class index_film:
                 if hashValue not in completed_lines_hash:
                     tmp_dict = {}
                     tmp = 0
-                    if len(list(line.strip().split('(',2))) == 2:
-                        for i in list(line.strip().split('(',2)):
+                    elem = list(line.strip().split('(',2))
+                    if len(elem) == 2:
+                        for i in elem:
                             if(tmp == 0):
                                 i = i.replace(':','')
                             else:
