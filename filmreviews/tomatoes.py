@@ -41,30 +41,37 @@ class tomatoes:
                 reviews.append(review)
         else:
             print("not_exists")
-        
-        with open('./index/reviews.txt','a') as openfile:
-            openfile.write(name + ": " + str(reviews)+"\n")
+        if reviews != []:
+            with open('./index/reviews.txt','a') as openfile:
+                openfile.write(name + ": " + str(reviews)+"\n")
+        else:
+            print('\t\t'+name + ": "+ self.url+str(name)+"/reviews/")
+
         return reviews
     #
     # ritorna la descrizione di tutti i film raccolti dall'indice creato
     #
     def get_movies_info(self,data, type_mode=0):
-        with futures.ThreadPoolExecutor(max_workers=10) as executor:
+        with futures.ThreadPoolExecutor(max_workers=8) as executor:
             to_do = []
+            count = 0
             for i in range(int(self.num_film)):
                     film_name = tomatoes.format_name(data[str(i)]["name"])
+                    if count == 10:
+                        time.sleep(2)
+                        count = 0
 
                     if type_mode == 0:
                         future = executor.submit(self.movie_info,film_name)
                     else:
-                        future = executor.submit(self.movie_reviews,film_name)
-
+                        future= executor.submit(self.movie_reviews,film_name)
                     to_do.append(future)
+                   
                     msg = 'Scheduled for {}: {}'
                     print(msg.format(film_name, future))
+                    count += 1
 
             results = []
-
             for future in futures.as_completed(to_do):
                 res = future.result()
                 print(msg.format(future,res))                
@@ -77,6 +84,7 @@ class tomatoes:
         film_name = film_name.replace(' ','_')
         film_name = film_name.replace('\'','')
         film_name = film_name.replace('-', '_')
+        film_name = film_name.replace(',','')
         return str(film_name)
 
     def test_iter(self,data):
