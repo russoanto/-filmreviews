@@ -15,7 +15,7 @@ class tomatoes:
         self.url = url
 
 
-    def movie_info(self, name:str) -> str:
+    def movie_info(self, name):
         desc = ""
         req = requests.get(self.url+str(name))
         if req.status_code != 404:
@@ -25,7 +25,7 @@ class tomatoes:
             return desc
         return "not_exists : " + name
     
-    def movie_reviews(self, name:str):
+    def movie_reviews(self, name):
         
         reviews = []
         req = requests.get(self.url+name+"/reviews/")
