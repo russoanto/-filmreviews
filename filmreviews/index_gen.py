@@ -113,7 +113,7 @@ class index_film:
             f.write('')
         
         alpha_string = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','numbers']
-        self.download_movies(['S','T'])
+        self.download_movies(alpha_string)
         self.index_json(id_gen)
         self.num_film = next(id_gen)-1
         return self.num_film
