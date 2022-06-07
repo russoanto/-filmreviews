@@ -8,6 +8,7 @@ import time
 from whoosh import fields
 from whoosh.fields import Schema
 from whoosh.index import Index, FileIndex
+import re
 import os, os.path
 
 
@@ -33,13 +34,12 @@ class tomatoes:
         req = requests.get(self.url+str(name))
         if req.status_code != 404:
             soup = BeautifulSoup(req.content, 'html.parser') 
-            for i in soup.find_all('li', class_="meta-row clearfix"):
-                if "Director" in i.get_text() or "Streaming" in i.get_text():
+            for i in soup.find_all('div', class_="meta-value"):
+                
                     tmp = str(i.get_text()).replace('\n','')
-                    tmp = tmp.replace('\t', '')
-                    tmp = tmp.replace('\r','')
-                    tmp = tmp.replace('\n', '')
-                    resp.append(tmp)
+                    tmp = re.sub(' +', ' ', tmp)
+                    resp.append(tmp.strip())
+                     
             return resp
         return "not_exists : " + name
 
@@ -74,6 +74,7 @@ class tomatoes:
                 review = review.replace('\r', '')
                 review = review.replace('Full Review', '')
                 review = review.replace('|', '')
+                review = re.sub(' +', ' ', review)
                 reviews.append(review.strip())
         else:
             print("not_exists")
@@ -122,6 +123,7 @@ class tomatoes:
         film_name = film_name.replace('\'','')
         film_name = film_name.replace('-', '_')
         film_name = film_name.replace(',','')
+        film_name = film_name.replace(':','')
         return str(film_name)
 
     def test_iter(self,data):
@@ -135,7 +137,7 @@ class tomatoes:
             print(self.movie_reviews(film_name))
 
 class indexTomatoes(tomatoes):
-    def __init__(self,schema,path_index,url = "https://www.rottentomatoes.com/m/"):
+    def __init__(self,path_index,url = "https://www.rottentomatoes.com/m/"):
         self.schema = Schema(
             id = fields.ID(unique=True,stored=True),
             title=fields.TEXT(stored=True),  
@@ -148,7 +150,9 @@ class indexTomatoes(tomatoes):
             runtime = fields.TEXT(stored=True),
         )
         self.path_index = path_index
-        self.url = urlchema(tit)
+        self.url = url
+
+
 
 # test = tomatoes('./index/index.json')
-# print(test.movie_casts(test.format_name('Spider man')))
+# print(test.movie_info(test.format_name('Spider man')))
