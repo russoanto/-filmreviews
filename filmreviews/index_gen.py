@@ -7,12 +7,13 @@ import os
 
 class index_film:
 
-    def __init__(self,url="https://en.wikipedia.org/wiki/List_of_films:_",path='./index/final_index.json', path_inter='./index/intermediate_index.txt',max=100000,num_film=0):
+    def __init__(self,url="https://en.wikipedia.org/wiki/List_of_films:_",path='./index/final_index.json', path_inter='./index/intermediate_index.txt',save_path='./index/resume.txt',max=100000,num_film=0):
         self.URL = url
         self.PATH = path
         self.PATH_INTER = path_inter
         self.MAX_NUM= max
         self.num_film = num_film
+        self.save_path = save_path
 
     
     def save_index(self):
@@ -72,6 +73,8 @@ class index_film:
                     print(msg.format(future,res))
                     results.append(res)
             return len(results)
+    
+    #TODO Eliminare i caratteri strani tipo \e034f, sono sempre 5 caratteri dopo il back slash (facile da fare)
 
     def index_json(self,id_gen):
         index = {}
