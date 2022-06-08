@@ -4,12 +4,12 @@ import time
 
 url = "https://advanced-movie-search.p.rapidapi.com/genre/movie/list"
 
-# headers = {
-# 	"X-RapidAPI-Host": "advanced-movie-search.p.rapidapi.com",
-# 	"X-RapidAPI-Key": "2f578134c9msha2d0e92b52a1562p114a96jsn29f99d2ca53b"
-# }
-
 headers = {
+	"X-RapidAPI-Host": "advanced-movie-search.p.rapidapi.com",
+	"X-RapidAPI-Key": "2f578134c9msha2d0e92b52a1562p114a96jsn29f99d2ca53b"
+}
+
+headers_2 = {
     'X-RapidAPI-Host': 'advanced-movie-search.p.rapidapi.com',
     'X-RapidAPI-Key': '4581bee7e0msh00a097b3e544861p17d736jsna6aeef75fb56'
 }
