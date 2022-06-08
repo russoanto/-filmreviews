@@ -19,18 +19,33 @@ class tomatoes:
         self.url = url
 
 
-    def movie_desc(self, name):
+    def movie_desc(self, param):
         desc = ""
+        name = param[0]
+        date = param[1]
         req = requests.get(self.url+str(name))
         if req.status_code != 404:
             soup = BeautifulSoup(req.content, 'html.parser') 
             for i in soup.find_all('div', class_="movie_synopsis clamp clamp-6 js-clamp"):
-                desc += i.get_text() 
+                tmp = str(i.get_text()).replace('\n','')
+                tmp = re.sub(' +', ' ', tmp)
+                desc += tmp.strip()
             return desc
+        else:
+            req = requests.get(self.url+str(name)+'_'+date)
+            if req.status_code != 404:
+                soup = BeautifulSoup(req.content, 'html.parser') 
+                for i in soup.find_all('div', class_="movie_synopsis clamp clamp-6 js-clamp"):
+                    tmp = str(i.get_text()).replace('\n','')
+                    tmp = re.sub(' +', ' ', tmp)
+                    desc += tmp.strip()
+                return desc
         return "not_exists : " + name
     
-    def movie_info(self,name):
+    def movie_info(self,param):
         resp = []
+        name = param[0]
+        date = param[1]
         req = requests.get(self.url+str(name))
         if req.status_code != 404:
             soup = BeautifulSoup(req.content, 'html.parser') 
@@ -39,12 +54,24 @@ class tomatoes:
                     tmp = str(i.get_text()).replace('\n','')
                     tmp = re.sub(' +', ' ', tmp)
                     resp.append(tmp.strip())
-                     
-            return resp
+            return req
+        else:
+            req = requests.get(self.url+str(name)+'_'+date)
+            if req.status_code != 404:
+                soup = BeautifulSoup(req.content, 'html.parser') 
+                for i in soup.find_all('div', class_="meta-value"):
+                    
+                        tmp = str(i.get_text()).replace('\n','')
+                        tmp = re.sub(' +', ' ', tmp)
+                        resp.append(tmp.strip())
+
+                return resp
         return "not_exists : " + name
 
-    def movie_casts(self,name):
+    def movie_casts(self,param):
         resp = []
+        name = param[0]
+        date = param[1]
         req = requests.get(self.url+str(name))
         if req.status_code != 404:
             soup = BeautifulSoup(req.content, 'html.parser') 
@@ -59,13 +86,28 @@ class tomatoes:
                 if 'View All' in i.get_text():
                     count += 1
             return resp
+        else:
+            req = requests.get(self.url+str(name))
+            if req.status_code != 404:
+                soup = BeautifulSoup(req.content, 'html.parser') 
+                count = 0
+                for i in soup.find_all('a', class_="unstyled articleLink"):
+                    if(count == 3):
+                        tmp = str(i.get_text()).replace('\n','')
+                        tmp = tmp.replace('\t', '')
+                        tmp = tmp.replace('\r','')
+                        tmp = tmp.replace('\n', '')
+                        resp.append(tmp.strip())
+                    if 'View All' in i.get_text():
+                        count += 1
+                return resp            
         return "not_exists : " + name       
     
-    def movie_reviews(self, name):
-        
+    def movie_reviews(self, param):
         reviews = []
+        name = param[0]
+        date = param[1]
         req = requests.get(self.url+name+"/reviews/")
-        print(name + ": "+ self.url+str(name)+"/reviews/")
         if req.status_code != 404:
             soup = BeautifulSoup(req.content, 'html.parser')
             for i in soup.find_all('div', class_="review_desc"):
@@ -77,44 +119,56 @@ class tomatoes:
                 review = re.sub(' +', ' ', review)
                 reviews.append(review.strip())
         else:
-            print("not_exists")
+            req = requests.get(self.url+name+'_'+date+"/reviews/")
+            if req.status_code != 404:
+                soup = BeautifulSoup(req.content, 'html.parser')
+                for i in soup.find_all('div', class_="review_desc"):
+                    review = str(i.get_text()).replace('\n','')
+                    review = review.replace('\t','')
+                    review = review.replace('\r', '')
+                    review = review.replace('Full Review', '')
+                    review = review.replace('|', '')
+                    review = re.sub(' +', ' ', review)
+                    reviews.append(review.strip())
+            else:          
+                print("not_exists: " + name)
         if reviews != []:
             with open('./index/reviews.txt','a') as openfile:
                 openfile.write(name + ": " + str(reviews)+"\n")
         else:
-            print('\t\t'+name + ": "+ self.url+str(name)+"/reviews/")
+            #print('\t\t'+name + ": "+ self.url+str(name)+"/reviews/")
+            pass
 
         return reviews
+
     #
     # ritorna la descrizione di tutti i film raccolti dall'indice creato
     #
-    def get_movies_info(self,data, type_mode=0):
-        with futures.ThreadPoolExecutor(max_workers=4) as executor:
-            to_do = []
-            count = 0
-            for i in range(len(data["movies"])):
-                    film_name = tomatoes.format_name(data["movies"][i]["title"])
-                    # if count == 10:
-                    #     time.sleep(0.5)
-                    #     print("SLEEP")
-                    #     count = 0
+    def get_movie_info(self,film_name,date):
+        param = [film_name,date]
+        with futures.ThreadPoolExecutor(4) as executor:
 
-                    if type_mode == 0:
-                        future = executor.submit(self.movie_info,film_name)
-                    else:
-                        future= executor.submit(self.movie_reviews,film_name)
-                    to_do.append(future)
-                   
-                    msg = 'Scheduled for {}: {}'
-                    print(msg.format(film_name, future))
-                    count += 1
+            future_desc =executor.submit(tomatoes.movie_desc,self,param)
 
-            results = []
-            for future in futures.as_completed(to_do):
-                res = future.result()
-                print(msg.format(future,res))                
-                results.append(res.strip())
-            return results
+            future_info = executor.submit(tomatoes.movie_info,self,param)
+
+            future_rev = executor.submit(tomatoes.movie_reviews,self,param)
+
+            future_casts = executor.submit(tomatoes.movie_casts,self,param)
+
+            ret = []
+            ret.append(future_desc.result())
+            ret.append(future_info.result())
+            ret.append(future_rev.result())
+            ret.append(future_casts.result())
+            if ret == []:
+                print("BHO")
+        return ret
+               
+                
+    #TODO Aggiungere filto per troppi trattini, attraverso le regex massimo un trattino 
+        
+
 
     @staticmethod
     def format_name(name):
@@ -151,6 +205,8 @@ class indexTomatoes(tomatoes):
         )
         self.path_index = path_index
         self.url = url
+
+    
 
 
 
