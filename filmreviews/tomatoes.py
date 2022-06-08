@@ -142,12 +142,12 @@ class indexTomatoes(tomatoes):
             id = fields.ID(unique=True,stored=True),
             title=fields.TEXT(stored=True),  
             content=fields.TEXT(stored=True), 
-            release_date=fields.DATETIME(stored=True),
-            reviews = fields.TEXT(stored=True),
-            genres = fields.KEYWORD(stored=True),
-            directors = fields.KEYWORD(stored=True),
-            casts = fields.KEYWORD(stored=True),
-            runtime = fields.TEXT(stored=True),
+            #release_date=fields.DATETIME(stored=True),
+            #reviews = fields.TEXT(stored=True),
+            #genres = fields.KEYWORD(stored=True),
+            #directors = fields.KEYWORD(stored=True),
+            #casts = fields.KEYWORD(stored=True),
+            #runtime = fields.TEXT(stored=True),
         )
         self.path_index = path_index
         self.url = url
