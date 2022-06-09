@@ -42,6 +42,13 @@ class tomatoes:
                 return desc
         return "not_exists : " + name
     
+    @staticmethod
+    def format_output(stringa):
+        stringa = stringa.split(':')
+        stringa = stringa[1].split(',')
+        return stringa[0]
+    
+    #TODO da cambiare il return
     def movie_info(self,param):
         resp = []
         name = param[0]
@@ -49,23 +56,31 @@ class tomatoes:
         req = requests.get(self.url+str(name))
         if req.status_code != 404:
             soup = BeautifulSoup(req.content, 'html.parser') 
-            for i in soup.find_all('div', class_="meta-value"):
-                
+            for i in soup.find_all('li', class_="meta-row clearfix"):
                     tmp = str(i.get_text()).replace('\n','')
                     tmp = re.sub(' +', ' ', tmp)
                     resp.append(tmp.strip())
-            return req
+            try:
+                direc = tomatoes.format_output(resp[3])
+                runtime = tomatoes.format_output(str(resp[9]))
+            except IndexError:
+                return ['',''] 
+            return [direc,runtime]
         else:
             req = requests.get(self.url+str(name)+'_'+date)
             if req.status_code != 404:
                 soup = BeautifulSoup(req.content, 'html.parser') 
-                for i in soup.find_all('div', class_="meta-value"):
+                for i in soup.find_all('li', class_="meta-row clearfix"):
                     
                         tmp = str(i.get_text()).replace('\n','')
                         tmp = re.sub(' +', ' ', tmp)
                         resp.append(tmp.strip())
-
-                return resp
+                try:
+                    direc = tomatoes.format_output(resp[3])
+                    runtime = tomatoes.format_output(str(resp[9]))
+                except IndexError:
+                    return ['',''] 
+                return [direc,runtime]
         return "not_exists : " + name
 
     def movie_casts(self,param):
@@ -133,8 +148,9 @@ class tomatoes:
             else:          
                 print("not_exists: " + name)
         if reviews != []:
-            with open('./index/reviews.txt','a') as openfile:
-                openfile.write(name + ": " + str(reviews)+"\n")
+            #with open('./index/reviews.txt','a') as openfile:
+                #openfile.write(name + ": " + str(reviews)+"\n")
+                pass
         else:
             #print('\t\t'+name + ": "+ self.url+str(name)+"/reviews/")
             pass
@@ -144,17 +160,15 @@ class tomatoes:
     #
     # ritorna la descrizione di tutti i film raccolti dall'indice creato
     #
+
     def get_movie_info(self,film_name,date):
-        param = [film_name,date]
+        params = [film_name,date]
         with futures.ThreadPoolExecutor(4) as executor:
 
-            future_desc =executor.submit(tomatoes.movie_desc,self,param)
-
-            future_info = executor.submit(tomatoes.movie_info,self,param)
-
-            future_rev = executor.submit(tomatoes.movie_reviews,self,param)
-
-            future_casts = executor.submit(tomatoes.movie_casts,self,param)
+            future_desc =executor.submit(tomatoes.movie_desc,self,params)
+            future_info = executor.submit(tomatoes.movie_info,self,params)
+            future_rev = executor.submit(tomatoes.movie_reviews,self,params)
+            future_casts = executor.submit(tomatoes.movie_casts,self,params)
 
             ret = []
             ret.append(future_desc.result())
@@ -163,6 +177,7 @@ class tomatoes:
             ret.append(future_casts.result())
             if ret == []:
                 print("BHO")
+            print(ret)
         return ret
                
                 
@@ -199,7 +214,7 @@ class indexTomatoes(tomatoes):
             #release_date=fields.DATETIME(stored=True),
             #reviews = fields.TEXT(stored=True),
             #genres = fields.KEYWORD(stored=True),
-            #directors = fields.KEYWORD(stored=True),
+            directors = fields.KEYWORD(stored=True),
             #casts = fields.KEYWORD(stored=True),
             #runtime = fields.TEXT(stored=True),
         )
@@ -211,4 +226,4 @@ class indexTomatoes(tomatoes):
 
 
 # test = tomatoes('./index/index.json')
-# print(test.movie_info(test.format_name('Spider man')))
+# print(test.movie_info([test.format_name('Spider-man'),'2001']))
