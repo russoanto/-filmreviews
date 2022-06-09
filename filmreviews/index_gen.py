@@ -29,7 +29,7 @@ class index_film:
             line = resume_file.readline()
             return line
         else:
-            return None
+            return Noneresponse
 
     def get_num_film(self):
         return self.num_film
