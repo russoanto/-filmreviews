@@ -5,6 +5,8 @@ from concurrent import futures
 import hashlib
 import os
 
+#TODO VA ELIMINATO 10/06/2022
+
 class index_film:
 
     def __init__(self,url="https://en.wikipedia.org/wiki/List_of_films:_",path='./index/final_index.json', path_inter='./index/intermediate_index.txt',save_path='./index/resume.txt',max=100000,num_film=0):

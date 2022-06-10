@@ -160,7 +160,7 @@ class tomatoes:
     #
     # ritorna la descrizione di tutti i film raccolti dall'indice creato
     #
-
+#TODO   Aggiungere il controllo sulla richiesta solo qui ed eliminarlo da tutti gli altri
     def get_movie_info(self,film_name,date):
         params = [film_name,date]
         with futures.ThreadPoolExecutor(4) as executor:
@@ -205,6 +205,8 @@ class tomatoes:
             print(film_name)
             print(self.movie_reviews(film_name))
 
+
+#TODO Spostaare i metodi per la costruzione dell'indice in questa classe (quelli presenti nel main)
 class indexTomatoes(tomatoes):
     def __init__(self,path_index,url = "https://www.rottentomatoes.com/m/"):
         self.schema = Schema(
