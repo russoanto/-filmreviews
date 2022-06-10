@@ -151,8 +151,10 @@ def main():
 
     search = ix.searcher()
     #print(list(searcher.lexicon("content")))
-    parser = QueryParser("directors", schema=ix.schema)
-    query = parser.parse(u"directors:Espinosa")
+    type_search = input('Inserire Il campo su cui ricercare: ')
+    parser = QueryParser(type_search, schema=ix.schema)
+    title = input('Inserire il parametro: ')
+    query = parser.parse(type_search+":"+title)
     results = search.search(query)
     if len(results) == 0:
         print("Empty result!!")
