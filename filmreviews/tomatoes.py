@@ -5,6 +5,7 @@ import index_gen,movie_search
 import concurrent.futures
 import threading
 import time
+import random
 from whoosh import fields
 from whoosh import index
 from whoosh.fields import Schema
@@ -116,7 +117,7 @@ class tomatoes:
         params = [film_name,date]
         if req.status_code != 404:
             params.append(req)
-            with futures.ThreadPoolExecutor(4) as executor:
+            with futures.ThreadPoolExecutor(10) as executor:
 
                 future_desc =executor.submit(tomatoes.movie_desc,self,params)
                 future_info = executor.submit(tomatoes.movie_info,self,params)
@@ -208,10 +209,20 @@ class indexTomatoes(tomatoes):
             executor.map(self.get_all_information, self.films)
 
     def get_all_information(self,film):
+
         name = self.format_name(film["title"])
         id_film = film["id"]
         param = [name,film["date"]]
+        start = time.time()
         richiesta = requests.get(self.url+name)
+        end = time.time()
+        if end-start >= 6:
+            print(end-start)
+            time.sleep(10)
+        elif end-start >= 2:
+            print(end-start)
+            time.sleep(5)
+
         if richiesta.status_code != 404:
             soup = BeautifulSoup(richiesta.content, 'html.parser')
             param.append(soup)
@@ -220,7 +231,7 @@ class indexTomatoes(tomatoes):
                 info = self.movie_info(param)
                 casts = self.movie_casts(param)
                 rev = self.movie_reviews(param)
-                film_schema = {'id':id,'title':name,'id':id_film,'overview':desc,'directors':info,'casts':casts,'reviews':rev}
+                film_schema = {'id':id,'title':film["title"],'id':id_film,'overview':desc,'directors':info,'casts':casts,'reviews':rev}
                 self._MOVIES.append(film_schema)
                 print(film_schema)
 
@@ -234,9 +245,17 @@ class indexTomatoes(tomatoes):
                     info = self.movie_info(param)
                     casts = self.movie_casts(param)
                     rev = self.movie_reviews(param)
-                    film_schema = {'id':id,'title':name,'id':id_film,'overview':desc,'directors':info,'casts':casts,'reviews':rev}
+                    film_schema = {'id':id,'title':film["title"],'id':id_film,'overview':desc,'directors':info,'casts':casts,'reviews':rev}
                     self._MOVIES.append(film_schema)
                     print(film_schema)
+    
+    def chunk_division(self):
+            resume_point = 0
+            chunk = int(len(self.films)/30)
+            start = 0
+            end = start + chunk
+            for i in tqdm(range(resume_point,30)):
+                pass
 
     def indexing(self):
         self.writer = self.ix.writer()
