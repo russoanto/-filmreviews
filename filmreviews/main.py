@@ -43,8 +43,8 @@ def main():
     #     ix = create_in("indexdir", pomodoro.schema)
     # else:
     #     ix = open_dir("indexdir")
-    pomodoro.scrape_all_information()
-    pomodoro.indexing()
+    #pomodoro.scrape_all_information()
+    #pomodoro.indexing()
     
     # titles = []
     # for i in data["movies"]:
@@ -151,17 +151,17 @@ def main():
     #         writer.add_document(id='4534534',title='Spider Man',content=resp[0])
     
 
-    # search = ix.searcher()
-    # #print(list(searcher.lexicon("content")))
-    # type_search = input('Inserire Il campo su cui ricercare: ')
-    # parser = QueryParser(type_search, schema=ix.schema)
-    # title = input('Inserire il parametro: ')
-    # query = parser.parse(type_search+":"+title)
-    # results = search.search(query)
-    # if len(results) == 0:
-    #     print("Empty result!!")
-    # else:
-    #     for x in results:
-    #         print(x)
+    search = pomodoro.ix.searcher()
+    #print(list(searcher.lexicon("content")))
+    type_search = input('Inserire Il campo su cui ricercare: ')
+    parser = QueryParser(type_search, schema=pomodoro.ix.schema)
+    title = input('Inserire il parametro: ')
+    query = parser.parse(type_search+":"+title)
+    results = search.search(query)
+    if len(results) == 0:
+        print("Empty result!!")
+    else:
+        for x in results:
+            print(x)
 
 main()
