@@ -38,13 +38,20 @@ class tomatoes:
         stringa = stringa.split(':')
         stringa = stringa[1].split(',')
         return stringa[0]
+    @staticmethod
+    def format_date(stringa):
+        stringa = stringa.split(':')
+        return stringa[1]
+
     
-    #TODO da cambiare il return
     def movie_info(self,param):
         resp = []
         name = param[0]
         date = param[1]
         soup = param[2] #era req
+        direc = ''
+        release_date = ''
+        runtime = ''
         #soup = BeautifulSoup(req.content, 'html.parser') 
         for i in soup.find_all('li', class_="meta-row clearfix"):
             tmp = str(i.get_text()).replace('\n','')
@@ -52,8 +59,12 @@ class tomatoes:
             resp.append(tmp.strip())
             for i in resp:
                 if 'Director' in i:
-                    return tomatoes.format_output(i)
-        return ''
+                    direc = self.format_output(i)
+                if 'Runtime' in i:
+                    runtime = self.format_output(i)
+                if 'Release Date' in i:
+                    release_date = self.format_date(i)
+        return (direc,runtime,release_date)
         
 
     def movie_casts(self,param):
@@ -73,7 +84,6 @@ class tomatoes:
                 if 'View All' in i.get_text():
                     count += 1
         return resp[:-1]
-
     
     def movie_reviews(self, param):
         reviews = []
@@ -186,12 +196,12 @@ class indexTomatoes(tomatoes):
                 id = fields.ID(unique=True,stored=True),
                 title=fields.TEXT(stored=True),  
                 content=fields.TEXT(stored=True), 
-                #release_date=fields.DATETIME(stored=True),
-                #reviews = fields.TEXT(stored=True),
+                release_date=fields.TEXT(stored=True),
+                reviews = fields.STORED,
                 #genres = fields.KEYWORD(stored=True),
                 directors = fields.TEXT(stored=True),
-                casts = fields.TEXT(stored=True),
-                #runtime = fields.TEXT(stored=True),
+                casts = fields.KEYWORD(stored=True,commas=True),
+                runtime = fields.TEXT(stored=True),
             )
             self.ix = index.create_in("indexdir", self.schema)
         else:
@@ -231,10 +241,9 @@ class indexTomatoes(tomatoes):
                 info = self.movie_info(param)
                 casts = self.movie_casts(param)
                 rev = self.movie_reviews(param)
-                film_schema = {'id':id,'title':film["title"],'id':id_film,'overview':desc,'directors':info,'casts':casts,'reviews':rev}
+                film_schema = {'title':film["title"],'id':id_film,'overview':desc,'directors':info[0],'casts':casts,'reviews':rev,'runtime':info[1],'release':info[2]}
                 self._MOVIES.append(film_schema)
                 print(film_schema)
-
         else:
             richiesta = requests.get(self.url+name+'_'+date)
             if richiesta.status_code != 404:
@@ -245,18 +254,10 @@ class indexTomatoes(tomatoes):
                     info = self.movie_info(param)
                     casts = self.movie_casts(param)
                     rev = self.movie_reviews(param)
-                    film_schema = {'id':id,'title':film["title"],'id':id_film,'overview':desc,'directors':info,'casts':casts,'reviews':rev}
+                    film_schema = {'title':film["title"],'id':id_film,'overview':desc,'directors':info[0],'casts':casts,'reviews':rev,'runtime':info[1],'release':info[2]}
                     self._MOVIES.append(film_schema)
                     print(film_schema)
     
-    def chunk_division(self):
-            resume_point = 0
-            chunk = int(len(self.films)/30)
-            start = 0
-            end = start + chunk
-            for i in tqdm(range(resume_point,30)):
-                pass
-
     def indexing(self):
         self.writer = self.ix.writer()
         for i in tqdm(range(len(self._MOVIES))):
@@ -264,8 +265,11 @@ class indexTomatoes(tomatoes):
                 id=str(self._MOVIES[i]["id"]),
                 title=self._MOVIES[i]["title"],
                 content=self._MOVIES[i]["overview"],
+                release_date = self._MOVIES[i]["release"],
+                reviews=self._MOVIES[i]["reviews"],
                 directors = self._MOVIES[i]["directors"],
                 casts=list(set(self._MOVIES[i]["casts"])),
+                runtime = self._MOVIES[i]["runtime"],
             )
         self.writer.commit()
 
