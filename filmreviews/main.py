@@ -43,8 +43,8 @@ def main():
     #     ix = create_in("indexdir", pomodoro.schema)
     # else:
     #     ix = open_dir("indexdir")
-    #pomodoro.scrape_all_information()
-    #pomodoro.indexing()
+    # pomodoro.scrape_all_information()
+    # pomodoro.indexing()
     
     # titles = []
     # for i in data["movies"]:
