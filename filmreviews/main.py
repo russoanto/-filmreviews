@@ -4,7 +4,7 @@ import os
 from concurrent import futures
 import time
 from whoosh import fields
-from whoosh.index import create_in
+from whoosh import index
 from whoosh.fields import Schema
 from whoosh.index import Index, FileIndex
 from whoosh.qparser import QueryParser
@@ -37,16 +37,18 @@ def main():
 
 
 
-    pomodoro = tomatoes.indexTomatoes('./index/index.json')
-    if not os.path.exists("indexdir"):
-        os.mkdir("indexdir")
-        ix = create_in("indexdir", pomodoro.schema)
-    else:
-        ix = open_dir("indexdir")
+    pomodoro = tomatoes.indexTomatoes('./index/index.json',data)
+    # if not os.path.exists("indexdir"):
+    #     os.mkdir("indexdir")
+    #     ix = create_in("indexdir", pomodoro.schema)
+    # else:
+    #     ix = open_dir("indexdir")
+    pomodoro.scrape_all_information()
+    pomodoro.indexing()
     
-    titles = []
-    for i in data["movies"]:
-        titles.append(pomodoro.format_name(i["title"]))
+    # titles = []
+    # for i in data["movies"]:
+    #     titles.append(pomodoro.format_name(i["title"]))
 
 
     # def download_all_info(film_name):
@@ -64,11 +66,11 @@ def main():
         return resp
 
     def write_all_info(data,i,writer):
-            if(i % 100 == 0):
-                time.sleep(5)
             resp = download_all_info(pomodoro.format_name(data["movies"][i]["title"]),data["movies"][i]["release_date"])
             if(resp != []):
-                writer.add_document(id=str(data["movies"][i]["id"]),title=data["movies"][i]["title"],content=resp[0],directors=resp[1][0])
+                #casts=' '.join(list(set(resp[3])))
+                writer.add_document(id=str(data["movies"][i]["id"]),title=data["movies"][i]["title"],content=resp[0],directors=resp[1][0],casts=list(set(resp[3])))
+            
         
     
 
@@ -76,7 +78,7 @@ def main():
     #    for title in sorted(titles):
     #         download_all(title)
         with ix.writer() as writer: 
-            with futures.ThreadPoolExecutor(10) as executor:
+            with futures.ThreadPoolExecutor(20) as executor:
                 to_do = []
                 for i in tqdm(range(start,end)):
                     future = executor.submit(write_all_info,data,i,writer)
@@ -149,17 +151,17 @@ def main():
     #         writer.add_document(id='4534534',title='Spider Man',content=resp[0])
     
 
-    search = ix.searcher()
-    #print(list(searcher.lexicon("content")))
-    type_search = input('Inserire Il campo su cui ricercare: ')
-    parser = QueryParser(type_search, schema=ix.schema)
-    title = input('Inserire il parametro: ')
-    query = parser.parse(type_search+":"+title)
-    results = search.search(query)
-    if len(results) == 0:
-        print("Empty result!!")
-    else:
-        for x in results:
-            print(x)
+    # search = ix.searcher()
+    # #print(list(searcher.lexicon("content")))
+    # type_search = input('Inserire Il campo su cui ricercare: ')
+    # parser = QueryParser(type_search, schema=ix.schema)
+    # title = input('Inserire il parametro: ')
+    # query = parser.parse(type_search+":"+title)
+    # results = search.search(query)
+    # if len(results) == 0:
+    #     print("Empty result!!")
+    # else:
+    #     for x in results:
+    #         print(x)
 
 main()
