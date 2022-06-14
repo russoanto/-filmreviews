@@ -1,7 +1,7 @@
 import requests
 import json
 from bs4 import BeautifulSoup
-import index_gen,movie_search
+import movie_search
 import concurrent.futures
 import threading
 import time
@@ -12,11 +12,10 @@ from whoosh.fields import Schema
 from tqdm import tqdm
 import re
 import os, os.path
-
+from analyzer import StandardAnalyzer_num
 class tomatoes:
 
-    def __init__(self,path_index,url = "https://www.rottentomatoes.com/m/"):
-        self.path_index = path_index
+    def __init__(self,url = "https://www.rottentomatoes.com/m/"):
         self.url = url
 
 
@@ -38,13 +37,26 @@ class tomatoes:
         stringa = stringa.split(':')
         stringa = stringa[1].split(',')
         return stringa[0]
+    @staticmethod
+    def format_genres(stringa):
+        stringa = stringa.split(':')
+        stringa = stringa[1].split(',')
+        return stringa
+    @staticmethod
+    def format_date(stringa):
+        stringa = stringa.split(':')
+        return stringa[1]
+
     
-    #TODO da cambiare il return
     def movie_info(self,param):
         resp = []
         name = param[0]
         date = param[1]
         soup = param[2] #era req
+        direc = ''
+        release_date = ''
+        runtime = ''
+        genres = ''
         #soup = BeautifulSoup(req.content, 'html.parser') 
         for i in soup.find_all('li', class_="meta-row clearfix"):
             tmp = str(i.get_text()).replace('\n','')
@@ -52,8 +64,14 @@ class tomatoes:
             resp.append(tmp.strip())
             for i in resp:
                 if 'Director' in i:
-                    return tomatoes.format_output(i)
-        return ''
+                    direc = self.format_output(i)
+                if 'Runtime' in i:
+                    runtime = self.format_output(i)
+                if 'Release Date' in i:
+                    release_date = self.format_date(i)
+                if 'Genre' in i:
+                    genres = ''.join(self.format_genres(i))
+        return (direc,runtime,release_date,genres)
         
 
     def movie_casts(self,param):
@@ -72,8 +90,7 @@ class tomatoes:
                     resp.append(tmp.strip())
                 if 'View All' in i.get_text():
                     count += 1
-        return resp[:-1]
-
+        return '-'.join(set(resp[:-1]))
     
     def movie_reviews(self, param):
         reviews = []
@@ -106,59 +123,6 @@ class tomatoes:
                 print("not_exists: " + name)
         return reviews
 
-
-
-    #
-    # ritorna la descrizione di tutti i film raccolti dall'indice creato
-    #
-    def get_movie_info(self,film_name,date):
-        req = requests.get(self.url+str(film_name))
-        ret = [] # vuota nel caso in cui il film non sia stato trovato
-        params = [film_name,date]
-        if req.status_code != 404:
-            params.append(req)
-            with futures.ThreadPoolExecutor(10) as executor:
-
-                future_desc =executor.submit(tomatoes.movie_desc,self,params)
-                future_info = executor.submit(tomatoes.movie_info,self,params)
-                future_rev = executor.submit(tomatoes.movie_reviews,self,params)
-                future_casts = executor.submit(tomatoes.movie_casts,self,params)
-
-                desc = future_desc.result()
-                info = future_info.result()
-                rev = future_rev.result()
-                cast = future_casts.result()
-                if desc != '':
-                    ret.append(desc)
-                    ret.append(info)
-                    ret.append(rev)
-                    ret.append(cast)
-                print(ret)
-        else:
-            req = requests.get(self.url+film_name+'_'+date)
-            if req.status_code != 404:
-                params.append(req)
-                with futures.ThreadPoolExecutor(4) as executor:
-
-                    future_desc =executor.submit(tomatoes.movie_desc,self,params)
-                    future_info = executor.submit(tomatoes.movie_info,self,params)
-                    future_rev = executor.submit(tomatoes.movie_reviews,self,params)
-                    future_casts = executor.submit(tomatoes.movie_casts,self,params)
-
-                    desc = future_desc.result()
-                    info = future_info.result()
-                    rev = future_rev.result()
-                    cast = future_casts.result()
-                    if desc != '':
-                        ret.append(desc)
-                        ret.append(info)
-                        ret.append(rev)
-                        ret.append(cast)
-                    print(ret)
-        
-        return ret
-               
-                
     #TODO Aggiungere filto per troppi trattini, attraverso le regex massimo un trattino 
         
     @staticmethod
@@ -179,25 +143,24 @@ class tomatoes:
 
 #TODO Spostaare i metodi per la costruzione dell'indice in questa classe (quelli presenti nel main)
 class indexTomatoes(tomatoes):
-    def __init__(self,path_index,data,url = "https://www.rottentomatoes.com/m/"):
+    def __init__(self,data,url = "https://www.rottentomatoes.com/m/"):
         if not os.path.exists("indexdir"):
             os.mkdir("indexdir")
             self.schema = Schema(
                 id = fields.ID(unique=True,stored=True),
-                title=fields.TEXT(stored=True),  
+                title=fields.TEXT(stored=True,analyzer=StandardAnalyzer_num()),  
                 content=fields.TEXT(stored=True), 
-                #release_date=fields.DATETIME(stored=True),
-                #reviews = fields.TEXT(stored=True),
-                #genres = fields.KEYWORD(stored=True),
+                release_date=fields.TEXT(stored=True),
+                reviews = fields.STORED,
+                genres = fields.KEYWORD(stored=True,scorable=True),
                 directors = fields.TEXT(stored=True),
-                casts = fields.TEXT(stored=True),
-                #runtime = fields.TEXT(stored=True),
+                casts = fields.KEYWORD(stored=True,commas=True,scorable=True),
+                runtime = fields.TEXT(stored=True),
             )
             self.ix = index.create_in("indexdir", self.schema)
         else:
             self.ix = index.open_dir("indexdir")
 
-        self.path_index = path_index
         self.url = url
         self._MOVIES = []
         self.films = []
@@ -206,7 +169,7 @@ class indexTomatoes(tomatoes):
 
     def scrape_all_information(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
-            executor.map(self.get_all_information, self.films)
+            executor.map(self.get_all_information, self.films[:-8000])
 
     def get_all_information(self,film):
 
@@ -218,7 +181,7 @@ class indexTomatoes(tomatoes):
         end = time.time()
         if end-start >= 6:
             print(end-start)
-            time.sleep(10)
+            time.sleep(15)
         elif end-start >= 2:
             print(end-start)
             time.sleep(5)
@@ -231,9 +194,10 @@ class indexTomatoes(tomatoes):
                 info = self.movie_info(param)
                 casts = self.movie_casts(param)
                 rev = self.movie_reviews(param)
-                film_schema = {'id':id,'title':film["title"],'id':id_film,'overview':desc,'directors':info,'casts':casts,'reviews':rev}
+                film_schema = {'title':film["title"],'id':id_film,'overview':desc,'directors':info[0],'casts':casts,'reviews':rev,'runtime':info[1],'release':info[2],'genre':info[3]}
                 self._MOVIES.append(film_schema)
                 print(film_schema)
+                #print(film_schema["casts"])
 
         else:
             richiesta = requests.get(self.url+name+'_'+date)
@@ -245,18 +209,10 @@ class indexTomatoes(tomatoes):
                     info = self.movie_info(param)
                     casts = self.movie_casts(param)
                     rev = self.movie_reviews(param)
-                    film_schema = {'id':id,'title':film["title"],'id':id_film,'overview':desc,'directors':info,'casts':casts,'reviews':rev}
+                    film_schema = {'title':film["title"],'id':id_film,'overview':desc,'directors':info[0],'casts':casts,'reviews':rev,'runtime':info[1],'release':info[2],'genre':info[3]}
                     self._MOVIES.append(film_schema)
                     print(film_schema)
     
-    def chunk_division(self):
-            resume_point = 0
-            chunk = int(len(self.films)/30)
-            start = 0
-            end = start + chunk
-            for i in tqdm(range(resume_point,30)):
-                pass
-
     def indexing(self):
         self.writer = self.ix.writer()
         for i in tqdm(range(len(self._MOVIES))):
@@ -264,14 +220,14 @@ class indexTomatoes(tomatoes):
                 id=str(self._MOVIES[i]["id"]),
                 title=self._MOVIES[i]["title"],
                 content=self._MOVIES[i]["overview"],
+                release_date = self._MOVIES[i]["release"],
+                reviews=self._MOVIES[i]["reviews"],
+                genres=self._MOVIES[i]["genre"],
                 directors = self._MOVIES[i]["directors"],
-                casts=list(set(self._MOVIES[i]["casts"])),
+                casts=self._MOVIES[i]["casts"],
+                runtime = self._MOVIES[i]["runtime"],
             )
         self.writer.commit()
-
-
-
-    
 
 
 
