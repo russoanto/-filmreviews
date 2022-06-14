@@ -1,4 +1,4 @@
-import tomatoes, index_gen,movie_search
+import tomatoes,movie_search
 import json
 import os
 from concurrent import futures
@@ -19,7 +19,6 @@ import readchar
 MAX_WORKERS = 4
 
 def main():
-    ix = index_gen.index_film()
 
     searcher = movie_search.movie_search()
     data = searcher.readIndex()
@@ -32,8 +31,6 @@ def main():
     pomodoro.scrape_all_information()
     pomodoro.indexing()
     
-
-
 
     search = pomodoro.ix.searcher()
     #print(list(searcher.lexicon("content")))

@@ -1,7 +1,7 @@
 import requests
 import json
 from bs4 import BeautifulSoup
-import index_gen,movie_search
+import movie_search
 import concurrent.futures
 import threading
 import time
@@ -12,7 +12,7 @@ from whoosh.fields import Schema
 from tqdm import tqdm
 import re
 import os, os.path
-
+from analyzer import StandardAnalyzer_num
 class tomatoes:
 
     def __init__(self,url = "https://www.rottentomatoes.com/m/"):
@@ -122,7 +122,7 @@ class tomatoes:
             else:          
                 print("not_exists: " + name)
         return reviews
-                 
+
     #TODO Aggiungere filto per troppi trattini, attraverso le regex massimo un trattino 
         
     @staticmethod
@@ -148,13 +148,13 @@ class indexTomatoes(tomatoes):
             os.mkdir("indexdir")
             self.schema = Schema(
                 id = fields.ID(unique=True,stored=True),
-                title=fields.TEXT(stored=True),  
+                title=fields.TEXT(stored=True,analyzer=StandardAnalyzer_num()),  
                 content=fields.TEXT(stored=True), 
                 release_date=fields.TEXT(stored=True),
                 reviews = fields.STORED,
-                genres = fields.KEYWORD(stored=True),
+                genres = fields.KEYWORD(stored=True,scorable=True),
                 directors = fields.TEXT(stored=True),
-                casts = fields.KEYWORD(stored=True,commas=True),
+                casts = fields.KEYWORD(stored=True,commas=True,scorable=True),
                 runtime = fields.TEXT(stored=True),
             )
             self.ix = index.create_in("indexdir", self.schema)
@@ -169,7 +169,7 @@ class indexTomatoes(tomatoes):
 
     def scrape_all_information(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
-            executor.map(self.get_all_information, self.films)
+            executor.map(self.get_all_information, self.films[:-8000])
 
     def get_all_information(self,film):
 

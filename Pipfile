@@ -7,6 +7,9 @@ name = "pypi"
 bs4 = "*"
 requests = "*"
 Whoosh = "*"
+tqdm = "*"
+readchar = "*"
+rotten-tomatoes-client = "*"
 
 [dev-packages]
 
