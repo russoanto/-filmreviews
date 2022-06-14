@@ -31,8 +31,7 @@ class movie_search:
     base_url = 'https://advanced-movie-search.p.rapidapi.com/'
     url_genre = 'https://advanced-movie-search.p.rapidapi.com/genre/movie/list'
     url_search = 'https://advanced-movie-search.p.rapidapi.com/discover/movie'
-    def __init__(self, path):
-        self.path_index = path
+    path_index = '../index/index.json'
 
 
     def getGenre(self):

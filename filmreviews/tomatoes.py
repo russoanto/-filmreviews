@@ -70,7 +70,7 @@ class tomatoes:
                 if 'Release Date' in i:
                     release_date = self.format_date(i)
                 if 'Genre' in i:
-                    genres = ''.join(self.format_genres(i))
+                    genres = str(''.join(self.format_genres(i)))
         return (direc,runtime,release_date,genres)
         
 
@@ -90,7 +90,7 @@ class tomatoes:
                     resp.append(tmp.strip())
                 if 'View All' in i.get_text():
                     count += 1
-        return '-'.join(set(resp[:-1]))
+        return str(','.join(set(resp[:-1])))
     
     def movie_reviews(self, param):
         reviews = []
@@ -152,9 +152,9 @@ class indexTomatoes(tomatoes):
                 content=fields.TEXT(stored=True), 
                 release_date=fields.TEXT(stored=True),
                 reviews = fields.STORED,
-                genres = fields.KEYWORD(stored=True,scorable=True),
+                genres = fields.TEXT(stored=True),
                 directors = fields.TEXT(stored=True),
-                casts = fields.KEYWORD(stored=True,commas=True,scorable=True),
+                casts = fields.TEXT(stored=True),
                 runtime = fields.TEXT(stored=True),
             )
             self.ix = index.create_in("indexdir", self.schema)

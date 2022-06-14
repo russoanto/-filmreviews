@@ -28,8 +28,8 @@ def main():
 
     pomodoro = tomatoes.indexTomatoes(data)
 
-    pomodoro.scrape_all_information()
-    pomodoro.indexing()
+    # pomodoro.scrape_all_information()
+    # pomodoro.indexing()
     
 
     search = pomodoro.ix.searcher()

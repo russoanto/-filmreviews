@@ -57,8 +57,9 @@ class imdb:
         self.url = url
 
 
-searcher = movie_search.movie_search("../index/index.json")
+searcher = movie_search.movie_search()
 data = searcher.readIndex()
+
 test = imdb("/movies/index.json", data,  "https://www.imdb.com/")
 resp = []
 for i in range(len(data["movies"])):
