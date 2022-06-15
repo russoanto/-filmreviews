@@ -59,15 +59,19 @@ class imdb:
 
 searcher = movie_search.movie_search()
 data = searcher.readIndex()
+<<<<<<< HEAD
+test = imdb("/movies/index.json", data,  "https://www.imdb.com")
+=======
 
 test = imdb("/movies/index.json", data,  "https://www.imdb.com/")
+>>>>>>> 12b917d68da6682bde695072a4b555523ccc8c6c
 resp = []
 for i in range(len(data["movies"])):
     resp.append(test.get_movie_info(test.format_name(data["movies"][i]["title"]),data["movies"][i]["release_date"]))
 for i in range(len(data["movies"])):
     print(resp[i][0])
 for i in range(len(data["movies"])):
-    test.scrapingDowload(resp[i][0], "https://www.imdb.com/")
+    test.scrapingDowload(resp[i][0], "https://www.imdb.com")
 
 #test.file_json()
 
