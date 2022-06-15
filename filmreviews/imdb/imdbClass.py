@@ -31,7 +31,6 @@ class imdb:
     def scrapingDownload(self, name, url):
         self.url += '/find?q=' #inserisco il link corretto.
         headers = {"Accept-Language": "en-US,en;q=0.5"}
-        name = 'sonic the hedgehog 2'
 
         self.url += name + '&title_type=feature&sort=year,asc'
             #'&title_type=feature&release_date=1986-01-01,&sort=year,asc&view=advanced'
