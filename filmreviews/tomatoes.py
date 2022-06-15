@@ -148,7 +148,7 @@ class indexTomatoes(tomatoes):
             os.mkdir("indexdir")
             self.schema = Schema(
                 id = fields.ID(unique=True,stored=True),
-                title=fields.TEXT(stored=True,analyzer=StandardAnalyzer_num()),  
+                title=fields.TEXT(stored=True,analyzer=StandardAnalyzer_num(),sortable=True),  
                 content=fields.TEXT(stored=True), 
                 release_date=fields.TEXT(stored=True),
                 reviews = fields.STORED,
@@ -169,7 +169,7 @@ class indexTomatoes(tomatoes):
 
     def scrape_all_information(self):
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
-            executor.map(self.get_all_information, self.films[:-8000])
+            executor.map(self.get_all_information, self.films)
 
     def get_all_information(self,film):
 
