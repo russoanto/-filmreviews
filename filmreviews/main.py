@@ -3,11 +3,15 @@ import json
 import os
 from concurrent import futures
 import time
+import re
+import math
 from whoosh import fields
 from whoosh import index
 from whoosh.fields import Schema
 from whoosh.index import Index, FileIndex
 from whoosh.qparser import syntax, Plugin, QueryParser, MultifieldPlugin
+from whoosh.analysis import RegexTokenizer,StemFilter
+
 from whoosh.index import open_dir
 from tqdm import tqdm
 import readchar
@@ -31,6 +35,11 @@ class FieldBoosterPlugin(Plugin):
                 elif node.has_fieldname and node.fieldname is not None:
                     node.set_boost(node.boost * self.boosts.get(node.fieldname, 1.0))
             return group
+
+def compute_discounted_cumulative_gain(data):
+    if len(data) == 0:
+        return 0
+    return data[0] + sum([(data[i] / math.log(i + 1, 2)) for i in range(1, len(data))])
 
 
 def main():
@@ -57,16 +66,22 @@ def main():
         # adds custom set boosts to each field in case the user specifically selects one of them with "field:value"
         # some fields are already boosted by default like "name" but an additional boost can be added by specifing it
     p.add_plugin(FieldBoosterPlugin({
-            'name':40, 'casts':40, 'release_date':40,'genres':40,'directors':40,
+            'title':40, 'casts':40, 'release_date':40,'genres':40,'directors':40,
     }))
     title = input('Inserire il parametro: ')
-    query = p.parse(title)
+    query_txt = re.sub(r"\s+[1I]$", "", title.strip())
+
+    query = p.parse(query_txt)
     results = search.search(query,terms=True,limit=None)
     # Was this results object created with terms=True?
     if results.has_matched_terms():
+        scores = []
         for x in results:
-            print(x["title"])
+            print(x["title"]+' '+str(x.score))
+            scores.append(x.score)
+        print(compute_discounted_cumulative_gain(scores))
     
 
 
 main()
+
