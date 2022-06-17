@@ -101,10 +101,15 @@ class imdb:
             for a in div.contents:
                 print(a.text)    
             break
-
+    
+    #sarebbe l'elemento 2 ma a volte manca il "pegi"
     def get_duration(self, soup):
         for ul in soup.find_all('ul', class_='ipc-inline-list ipc-inline-list--show-dividers sc-8c396aa2-0 kqWovI baseAlt'):
-            print(ul.contents[2].text)
+            #print(ul.contents[2].text)
+            if(len(ul.contents)==3):
+                print(ul.contents[2].text)
+            elif(len(ul.contents)==2):
+                print(ul.contents[1].text)
             break
 
     
@@ -130,7 +135,7 @@ class imdb:
             
             break
             
-f = open("demofile2.txt", "a")
+f = open("demofile3.txt", "a")
 
 
 searcher = movie_search.movie_search()
