@@ -62,12 +62,12 @@ class imdb:
         #qua chiamo tutte le funzioni
         try:
             test = self.get_director_writers_starts(soup)
-            for i in test[0]:
-                print(i)
-            for i in test[1]:
-                print(i)
-            for i in test[2]:
-                print(i)
+            for j in test[0]:
+                print(j)
+            for j in test[1]:
+                print(j)
+            for j in test[2]:
+                print(j)
             print(self.get_duration(soup))
             print(self.get_genres(soup))
             print(self.get_rating(soup))
