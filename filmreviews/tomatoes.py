@@ -162,7 +162,7 @@ class indexTomatoes(tomatoes):
             self.ix = index.open_dir("indexdir")
 
         self.url = url
-        self._MOVIES = []
+        self._MOVIES = set()
         self.films = []
         for i in range(len(data["movies"])):
             self.films.append({'id':data["movies"][i]["id"],'title':data["movies"][i]["title"],'date':data["movies"][i]["release_date"]})
@@ -194,7 +194,14 @@ class indexTomatoes(tomatoes):
                 info = self.movie_info(param)
                 casts = self.movie_casts(param)
                 rev = self.movie_reviews(param)
-                film_schema = {'title':film["title"],'id':id_film,'overview':desc,'directors':info[0],'casts':casts,'reviews':rev,'runtime':info[1],'release':info[2],'genre':info[3]}
+                film_schema = {'title':film["title"],
+                'id':id_film,'overview':desc,
+                'directors':info[0],
+                'casts':casts,
+                'reviews':rev,
+                'runtime':info[1],
+                'release':info[2],
+                'genre':info[3]}
                 self._MOVIES.append(film_schema)
                 print(film_schema)
                 #print(film_schema["casts"])

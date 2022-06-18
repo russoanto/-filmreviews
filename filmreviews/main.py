@@ -1,4 +1,4 @@
-import tomatoes,movie_search
+import tomatoes,movie_search,imdbClass
 import json
 import os
 from concurrent import futures
@@ -15,6 +15,7 @@ from whoosh.analysis import RegexTokenizer,StemFilter
 from whoosh.index import open_dir
 from tqdm import tqdm
 import readchar
+
 
 
 class FieldBoosterPlugin(Plugin):
@@ -49,13 +50,16 @@ def main():
 
     pomodoro = tomatoes.indexTomatoes(data)
 
+    imdb = imdbClass.imdbIndex("./movies/index.json", data, "https://www.imdb.com")
+    # imdb.get_all_information_t()
+    # imdb.indexing()
     # pomodoro.scrape_all_information()
     # pomodoro.indexing()
     
+    #search = pomodoro.ix.searcher()
+    search = imdb.ix.searcher()
 
-    search = pomodoro.ix.searcher()
-    #print(list(searcher.lexicon("content")))
-    #type_search = input('Inserire Il campo su cui ricercare: ')
+
     p = QueryParser(None, pomodoro.ix.schema, group=syntax.OrGroup)
     fieldboosts = {
             'title': 6,
@@ -63,8 +67,8 @@ def main():
     }
     mfp = MultifieldPlugin(('title', 'content', 'casts','directors'), fieldboosts=fieldboosts)
     p.add_plugin(mfp)
-        # adds custom set boosts to each field in case the user specifically selects one of them with "field:value"
-        # some fields are already boosted by default like "name" but an additional boost can be added by specifing it
+
+
     p.add_plugin(FieldBoosterPlugin({
             'title':40, 'casts':40, 'release_date':40,'genres':40,'directors':40,
     }))

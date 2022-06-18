@@ -6,6 +6,7 @@ import requests
 import movie_search
 
 import concurrent.futures
+import time
 
 from whoosh import fields
 from whoosh import index
@@ -19,11 +20,8 @@ class imdb:
     def __init__(self, path_index, data, url):
         self.url = url
         self.path_index = path_index
-        self.films = []
-        self.films_name = []
-        for i in range(len(data["movies"])):
-            self.films.append({'id':data["movies"][i]["id"],'title':data["movies"][i]["title"],'date':data["movies"][i]["release_date"]})
-            self.films_name.append(data["movies"][i]["title"])
+
+        #print(self.films)
         
     @staticmethod
     def format_name(name):
@@ -41,7 +39,7 @@ class imdb:
     def get_reviews(self,soup):
         count=0
         reviews = []
-        print(self.url)
+        #print(self.url)
         for i in soup.find_all('div', class_='text show-more__control'):
             #print(i.get_text(),'\n')
             reviews.append(i.get_text())
@@ -50,63 +48,7 @@ class imdb:
             #print(count)
 
 
-    def scrapingDownload(self, name):
 
-        self.url += '/find?q=' #inserisco il link corretto.
-        headers = {"Accept-Language": "en-US,en;q=0.5"}
-
-        self.url += name + '&title_type=feature&sort=year,asc'
-            #'&title_type=feature&release_date=1986-01-01,&sort=year,asc&view=advanced'
-        #print(self.url)
-
-
-        soup = BeautifulSoup(requests.get(self.url, headers=headers).content, 'html.parser') 
-
-        
-
-        for i in soup.find_all('a'):
-           # print(i.get_text().lower().lstrip().rstrip(), " ", str(name).lower())
-            if(i.get_text().lower().strip()== str(name)):
-                #print(i.get('href'))
-                self.url = 'https://www.imdb.com' + i.get('href') + '?ref_=tt_urv'
-                break
-        print("------------------------------")
-        print(self.url)
-
-        soup = BeautifulSoup(requests.get(self.url, headers=headers).content, 'html.parser') 
-
-        ###################################
-        #qua chiamo tutte le funzioni
-        try:
-            test = self.get_director_writers_starts(soup)
-            for j in test[0]:
-                print(j)
-            for j in test[1]:
-                print(j)
-            for j in test[2]:
-                print(j)
-            durata = self.get_duration(soup)
-            genres = self.get_genres(soup)
-            rating = self.get_rating(soup)
-            content = self.get_content(soup)
-            print(durata + " " + genres + " " + rating + " \n" + content + "\n")
-        except:
-            f.write(str(self.url))
-            f.write('\n')
-
-
-        ################################
-        
-        try:
-            self.url = 'https://www.imdb.com' + i.get('href') + 'reviews?sort=userRating&dir=desc&ratingFilter=0'
-            soup = BeautifulSoup(requests.get(self.url, headers=headers).content, 'html.parser') 
-            self.get_reviews(soup)
-        except:
-            print("è successo")
-        self.resetUrl("https://www.imdb.com")
-
-    def resetUrl(self, url):
-        self.url = url
 
 
     #########################
@@ -133,7 +75,7 @@ class imdb:
                 #print(a.text) 
                 genres.append(a.text)
             break
-        return genres
+        return ','.join(genres)
     
     #sarebbe l'elemento 2 ma a volte manca il "pegi"
     def get_duration(self, soup):
@@ -177,26 +119,25 @@ class imdb:
                 #print(stars.contents[0].contents[0].text)
             
             break
-        return (writers,actors_l,director)
-        
-    def get_all_information(self):
-        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
-            executor.map(self.scrapingDownload,self.films_name)
+        return (','.join(writers),','.join(actors_l),','.join(director))
+
+
     
-f = open("demofile3.txt", "a")
+# f = open("demofile3.txt", "a")
 
 
-searcher = movie_search.movie_search()
-data = searcher.readIndex()
-test = imdb("/movies/index.json", data,  "https://www.imdb.com")
-resp = []
-# for i in tqdm(range(len(data["movies"]))):
-#     resp.append(test.get_movie_info(test.format_name(data["movies"][i]["title"]),data["movies"][i]["release_date"]))
-#     #print(resp[i])
+# searcher = movie_search.movie_search()
+# data = searcher.readIndex()
+# test = imdb("/movies/index.json", data,  "https://www.imdb.com")
+# resp = []
+# # for i in tqdm(range(len(data["movies"]))):
+# #     resp.append(test.get_movie_info(test.format_name(data["movies"][i]["title"]),data["movies"][i]["release_date"]))
+# #     print(resp[i])
 # #     test.scrapingDownload(resp[i][0])
-test.get_all_information()
+    
+# test.get_all_information_t()
 
-f.close()
+# f.close()
 
 
 #test.file_json()
@@ -207,13 +148,13 @@ for i in range(0, 9440):
 ''' 
 
 class imdbIndex(imdb):
-   def __init__(self, path_index, data, url):
+    def __init__(self, path_index, data, url):
         self.url = url
         self.path_index = path_index
         self.films = []
         for i in range(len(data["movies"])):
-            self.films.append({'id':data["movies"][i]["id"],'title':data["movies"][i]["title"],'date':data["movies"][i]["release_date"]})
-
+            self.films.append({'id':data["movies"][i]["id"],'title':imdb.format_name(data["movies"][i]["title"]),'date':data["movies"][i]["release_date"]})
+        self._MOVIES = []
         if not os.path.exists("indexdirIMDB"):
             os.mkdir("indexdirIMDB")
             self.schema = Schema(
@@ -231,3 +172,106 @@ class imdbIndex(imdb):
             self.ix = index.create_in("indexdirIMDB", self.schema)
         else:
             self.ix = index.open_dir("indexdirIMDB")
+
+    def scrapingDownload(self,film):
+        self.url += '/find?q=' #inserisco il link corretto.
+        headers = {"Accept-Language": "en-US,en;q=0.5"}
+
+        self.url += film["title"] + '&title_type=feature&sort=year,asc'
+            #'&title_type=feature&release_date=1986-01-01,&sort=year,asc&view=advanced'
+        #print(self.url)
+
+        start = time.time()
+        richiesta = requests.get(self.url, headers=headers)
+        end = time.time()
+
+        if richiesta.status_code != 404:
+            soup = BeautifulSoup(richiesta.content, 'html.parser')
+            for i in soup.find_all('a'):
+            # print(i.get_text().lower().lstrip().rstrip(), " ", str(name).lower())
+                if(i.get_text().lower().strip()== str(film["title"])):
+                    #print(i.get('href'))
+                    self.url = 'https://www.imdb.com' + i.get('href') + '?ref_=tt_urv'
+                    break
+       #print(self.url)
+            start = time.time()
+            richiesta = requests.get(self.url, headers=headers)
+            end = time.time()
+            if end-start >= 6:
+                time.sleep(10)
+            elif end-start >= 2:
+                time.sleep(5)
+        #print(richiesta.status_code)
+            if richiesta.status_code != 404:
+                soup = BeautifulSoup(richiesta.content, 'html.parser') 
+        
+                ###################################
+                #qua chiamo tutte le funzioni
+                try:
+                    test = self.get_director_writers_starts(soup)
+                    # for j in test[0]:
+                    #     print(j)
+                    # for j in test[1]:
+                    #     print(j)
+                    # for j in test[2]:
+                    #     print(j)
+                    durata = self.get_duration(soup)
+                    genres = self.get_genres(soup)
+                    rating = self.get_rating(soup)
+                    content = self.get_content(soup)
+                    #print(durata + " " + genres + " " + rating + " \n" + content + "\n")
+                except:
+                    f.write(str(self.url))
+                    f.write('\n')
+                ################################
+                reviews = []
+                try:
+                    self.url = 'https://www.imdb.com' + i.get('href') + 'reviews?sort=userRating&dir=desc&ratingFilter=0'
+                    soup = BeautifulSoup(requests.get(self.url, headers=headers).content, 'html.parser') 
+                    reviews.append(self.get_reviews(soup))
+                except:
+                    reviews = []
+                self.resetUrl("https://www.imdb.com")
+
+                if content != '':
+                    film_schema = {
+                    'id':film["id"],
+                    'title':film["title"],
+                    'release':film["date"],
+                    'content':content,
+                    'reviews':reviews,
+                    'directors':test[2],
+                    'writers':test[0],
+                    'actors':test[1],
+                    'genres':genres,
+                    'rating':float(rating),
+                    'runtime':durata,
+                    }
+                    print(film_schema)
+                    self._MOVIES.append(film_schema)
+        print("------------------------------")
+        
+
+    def resetUrl(self, url):
+        self.url = url
+    
+    def get_all_information_t(self):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+            executor.map(self.scrapingDownload,self.films)
+    
+    def indexing(self):
+        self.writer = self.ix.writer()
+        for i in tqdm(range(len(self._MOVIES))):
+            self.writer.add_document(
+                id=str(self._MOVIES[i]["id"]),
+                title=self._MOVIES[i]["title"],
+                content=self._MOVIES[i]["content"],
+                release_date = self._MOVIES[i]["release"],
+                reviews=self._MOVIES[i]["reviews"],
+                genres=self._MOVIES[i]["genres"],
+                directors = self._MOVIES[i]["directors"],
+                casts=self._MOVIES[i]["actors"],
+                runtime = self._MOVIES[i]["runtime"],
+                rating = self._MOVIES[i]["rating"],
+            )
+        self.writer.commit()
