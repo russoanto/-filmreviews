@@ -261,17 +261,20 @@ class imdbIndex(imdb):
     
     def indexing(self):
         self.writer = self.ix.writer()
+        ids = set()
         for i in tqdm(range(len(self._MOVIES))):
-            self.writer.add_document(
-                id=str(self._MOVIES[i]["id"]),
-                title=self._MOVIES[i]["title"],
-                content=self._MOVIES[i]["content"],
-                release_date = self._MOVIES[i]["release"],
-                reviews=self._MOVIES[i]["reviews"],
-                genres=self._MOVIES[i]["genres"],
-                directors = self._MOVIES[i]["directors"],
-                casts=self._MOVIES[i]["actors"],
-                runtime = self._MOVIES[i]["runtime"],
-                rating = self._MOVIES[i]["rating"],
-            )
+            if self._MOVIES[i]["id"] not in ids:
+                self.writer.add_document(
+                    id=str(self._MOVIES[i]["id"]),
+                    title=self._MOVIES[i]["title"],
+                    content=self._MOVIES[i]["content"],
+                    release_date = self._MOVIES[i]["release"],
+                    reviews=self._MOVIES[i]["reviews"],
+                    genres=self._MOVIES[i]["genres"],
+                    directors = self._MOVIES[i]["directors"],
+                    casts=self._MOVIES[i]["actors"],
+                    runtime = self._MOVIES[i]["runtime"],
+                    rating = self._MOVIES[i]["rating"],
+                )
+                ids.add(self._MOVIES[i]["id"])
         self.writer.commit()

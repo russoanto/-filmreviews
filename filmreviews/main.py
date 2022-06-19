@@ -56,8 +56,9 @@ def main():
     # pomodoro.scrape_all_information()
     # pomodoro.indexing()
     
-    #search = pomodoro.ix.searcher()
+    searchPOM = pomodoro.ix.searcher()
     search = imdb.ix.searcher()
+
 
 
     p = QueryParser(None, pomodoro.ix.schema, group=syntax.OrGroup)
@@ -76,15 +77,22 @@ def main():
     query_txt = re.sub(r"\s+[1I]$", "", title.strip())
 
     query = p.parse(query_txt)
-    results = search.search(query,terms=True,limit=None)
+    results = search.search(query,terms=True,limit=5)
+    resultsPOM = searchPOM.search(query, terms=True, limit=5)
     # Was this results object created with terms=True?
     if results.has_matched_terms():
         scores = []
         for x in results:
-            print(x["title"]+' '+str(x.score))
+            print(x["title"]+' ' + ' ' +str(x.score))
             scores.append(x.score)
-        print(compute_discounted_cumulative_gain(scores))
-    
+        #print(compute_discounted_cumulative_gain(scores))
+    print("-----------------------------")
+    if resultsPOM.has_matched_terms():
+        scores = []
+        for x in results:
+            print(x["title"]+' ' + x["release_date"]+ ' ' +str(x.score))
+            scores.append(x.score)
+
 
 
 main()

@@ -62,6 +62,7 @@ class movie_search:
 
     #Effettuo più richieste per ottenere più pagine (ogni pagina contiene 20 film)
     def getAllPageMovie(self):
+        ids = set()
         time.sleep(1)
         movies = {'movies':[]}
         for i in self.genreId:
@@ -83,12 +84,14 @@ class movie_search:
                     time.sleep(5)
                 else:
                     for i in range(19):
-                        try:
-                            obj = {'id':resp["results"][i]["id"],'title':resp["results"][i]["title"],'release_date':resp["results"][i]["release_date"].split('-')[0],'overview':resp["results"][i]["overview"]}
-                        except KeyError:
-                            obj = {'id':resp["results"][i]["id"],'title':resp["results"][i]["title"],'release_date':'0000','overview':resp["results"][i]["overview"]}
-       
-                        movies["movies"].append(obj)                   
+                        if resp["results"][i]["id"] not in ids:
+                            try:
+                                obj = {'id':resp["results"][i]["id"],'title':resp["results"][i]["title"],'release_date':resp["results"][i]["release_date"].split('-')[0],'overview':resp["results"][i]["overview"]}
+                            except KeyError:
+                                obj = {'id':resp["results"][i]["id"],'title':resp["results"][i]["title"],'release_date':'0000','overview':resp["results"][i]["overview"]}
+
+                            ids.add(resp["results"][i]["id"])
+                            movies["movies"].append(obj)                   
                 count += 1
                 time.sleep(1)
         jsonString = json.dumps(movies)

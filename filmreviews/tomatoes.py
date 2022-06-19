@@ -148,7 +148,7 @@ class indexTomatoes(tomatoes):
             os.mkdir("indexdir")
             self.schema = Schema(
                 id = fields.ID(unique=True,stored=True),
-                title=fields.TEXT(stored=True,analyzer=StandardAnalyzer_num(),sortable=True),  
+                title=fields.TEXT(stored=True,analyzer=StandardAnalyzer_num()),  
                 content=fields.TEXT(stored=True), 
                 release_date=fields.TEXT(stored=True),
                 reviews = fields.STORED,
@@ -162,7 +162,7 @@ class indexTomatoes(tomatoes):
             self.ix = index.open_dir("indexdir")
 
         self.url = url
-        self._MOVIES = set()
+        self._MOVIES = []
         self.films = []
         for i in range(len(data["movies"])):
             self.films.append({'id':data["movies"][i]["id"],'title':data["movies"][i]["title"],'date':data["movies"][i]["release_date"]})
@@ -176,9 +176,11 @@ class indexTomatoes(tomatoes):
         name = self.format_name(film["title"])
         id_film = film["id"]
         param = [name,film["date"]]
+
         start = time.time()
         richiesta = requests.get(self.url+name)
         end = time.time()
+
         if end-start >= 6:
             print(end-start)
             time.sleep(15)
@@ -194,16 +196,19 @@ class indexTomatoes(tomatoes):
                 info = self.movie_info(param)
                 casts = self.movie_casts(param)
                 rev = self.movie_reviews(param)
-                film_schema = {'title':film["title"],
-                'id':id_film,'overview':desc,
+                film_schema = {
+                'title':film["title"],
+                'id':id_film,
+                'overview':desc,
                 'directors':info[0],
                 'casts':casts,
                 'reviews':rev,
                 'runtime':info[1],
                 'release':info[2],
-                'genre':info[3]}
+                'genre':info[3],}
                 self._MOVIES.append(film_schema)
                 print(film_schema)
+
                 #print(film_schema["casts"])
 
         else:
@@ -222,19 +227,23 @@ class indexTomatoes(tomatoes):
     
     def indexing(self):
         self.writer = self.ix.writer()
+        ids = set()
         for i in tqdm(range(len(self._MOVIES))):
-            self.writer.add_document(
-                id=str(self._MOVIES[i]["id"]),
-                title=self._MOVIES[i]["title"],
-                content=self._MOVIES[i]["overview"],
-                release_date = self._MOVIES[i]["release"],
-                reviews=self._MOVIES[i]["reviews"],
-                genres=self._MOVIES[i]["genre"],
-                directors = self._MOVIES[i]["directors"],
-                casts=self._MOVIES[i]["casts"],
-                runtime = self._MOVIES[i]["runtime"],
-            )
+            if(self._MOVIES[i]["id"] not in ids):
+                self.writer.add_document(
+                    id=str(self._MOVIES[i]["id"]),
+                    title=self._MOVIES[i]["title"],
+                    content=self._MOVIES[i]["overview"],
+                    release_date = self._MOVIES[i]["release"],
+                    reviews=self._MOVIES[i]["reviews"],
+                    genres=self._MOVIES[i]["genre"],
+                    directors = self._MOVIES[i]["directors"],
+                    casts=self._MOVIES[i]["casts"],
+                    runtime = self._MOVIES[i]["runtime"],
+                )
+                ids.add(self._MOVIES[i]["id"])
         self.writer.commit()
+
 
 
 
