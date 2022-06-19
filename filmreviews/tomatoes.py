@@ -223,12 +223,15 @@ class indexTomatoes(tomatoes):
                     rev = self.movie_reviews(param)
                     film_schema = {'title':film["title"],'id':id_film,'overview':desc,'directors':info[0],'casts':casts,'reviews':rev,'runtime':info[1],'release':info[2],'genre':info[3]}
                     self._MOVIES.append(film_schema)
+
                     print(film_schema)
     
     def indexing(self):
         self.writer = self.ix.writer()
         ids = set()
         for i in tqdm(range(len(self._MOVIES))):
+            with open('./test.txt','a') as openfile:
+                openfile.write(self._MOVIES[i]["title"]+ '\n')
             if(self._MOVIES[i]["id"] not in ids):
                 self.writer.add_document(
                     id=str(self._MOVIES[i]["id"]),

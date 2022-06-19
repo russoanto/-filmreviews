@@ -153,7 +153,7 @@ class imdbIndex(imdb):
         self.path_index = path_index
         self.films = []
         for i in range(len(data["movies"])):
-            self.films.append({'id':data["movies"][i]["id"],'title':imdb.format_name(data["movies"][i]["title"]),'date':data["movies"][i]["release_date"]})
+            self.films.append({'id':data["movies"][i]["id"],'title':data["movies"][i]["title"],'date':data["movies"][i]["release_date"]})
         self._MOVIES = []
         if not os.path.exists("indexdirIMDB"):
             os.mkdir("indexdirIMDB")
@@ -177,7 +177,7 @@ class imdbIndex(imdb):
         self.url += '/find?q=' #inserisco il link corretto.
         headers = {"Accept-Language": "en-US,en;q=0.5"}
 
-        self.url += film["title"] + '&title_type=feature&sort=year,asc'
+        self.url += imdb.format_name(film["title"]) + '&title_type=feature&sort=year,asc'
             #'&title_type=feature&release_date=1986-01-01,&sort=year,asc&view=advanced'
         #print(self.url)
 
@@ -189,7 +189,7 @@ class imdbIndex(imdb):
             soup = BeautifulSoup(richiesta.content, 'html.parser')
             for i in soup.find_all('a'):
             # print(i.get_text().lower().lstrip().rstrip(), " ", str(name).lower())
-                if(i.get_text().lower().strip()== str(film["title"])):
+                if(i.get_text().lower().strip()== str(imdb.format_name(film["title"]))):
                     #print(i.get('href'))
                     self.url = 'https://www.imdb.com' + i.get('href') + '?ref_=tt_urv'
                     break

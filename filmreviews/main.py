@@ -51,46 +51,64 @@ def main():
     pomodoro = tomatoes.indexTomatoes(data)
 
     imdb = imdbClass.imdbIndex("./movies/index.json", data, "https://www.imdb.com")
+
     # imdb.get_all_information_t()
     # imdb.indexing()
-    # pomodoro.scrape_all_information()
-    # pomodoro.indexing()
+    pomodoro.scrape_all_information()
+    pomodoro.indexing()
     
     searchPOM = pomodoro.ix.searcher()
-    search = imdb.ix.searcher()
-
-
+    searchIMD = imdb.ix.searcher()
 
     p = QueryParser(None, pomodoro.ix.schema, group=syntax.OrGroup)
     fieldboosts = {
             'title': 6,
-            'content':1,
+            'content':2,
     }
     mfp = MultifieldPlugin(('title', 'content', 'casts','directors'), fieldboosts=fieldboosts)
     p.add_plugin(mfp)
 
 
     p.add_plugin(FieldBoosterPlugin({
-            'title':40, 'casts':40, 'release_date':40,'genres':40,'directors':40,
+            'title':40, 'casts':40, 'release_date':40,'genres':40,'directors':40,'content':40,
     }))
     title = input('Inserire il parametro: ')
-    query_txt = re.sub(r"\s+[1I]$", "", title.strip())
+    #query_txt = re.sub(r"\s+[1I]$", "", title.strip())
 
-    query = p.parse(query_txt)
-    results = search.search(query,terms=True,limit=5)
-    resultsPOM = searchPOM.search(query, terms=True, limit=5)
-    # Was this results object created with terms=True?
-    if results.has_matched_terms():
+    queryPom = p.parse(title)
+
+
+# #--------------------------------------------------------
+
+    im = QueryParser(None, imdb.ix.schema, group=syntax.OrGroup)
+    fieldboosts = {
+            'title': 6,
+            'content':1,
+    }
+    mfp = MultifieldPlugin(('title', 'content', 'casts','directors'), fieldboosts=fieldboosts)
+    im.add_plugin(mfp)
+
+
+    p.add_plugin(FieldBoosterPlugin({
+            'title':40, 'casts':40, 'release_date':40,'genres':40,'directors':40,'content':40,
+    }))
+
+    queryImd = im.parse(title)
+
+
+    resultsIMD = searchIMD.search(queryImd,terms=True,limit=5)
+    resultsPOM = searchPOM.search(queryPom, terms=True,limit=5)
+
+    if resultsIMD.has_matched_terms():
         scores = []
-        for x in results:
-            print(x["title"]+' ' + ' ' +str(x.score))
+        for x in resultsIMD:
+            print(x["title"] + ' --> ' + x["casts"] + '\n')
             scores.append(x.score)
-        #print(compute_discounted_cumulative_gain(scores))
     print("-----------------------------")
     if resultsPOM.has_matched_terms():
         scores = []
-        for x in results:
-            print(x["title"]+' ' + x["release_date"]+ ' ' +str(x.score))
+        for x in resultsPOM:
+            print(x["title"] + ' --> ' + x["casts"] + '\n')
             scores.append(x.score)
 
 
