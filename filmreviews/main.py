@@ -16,7 +16,7 @@ from whoosh.index import open_dir
 from tqdm import tqdm
 import readchar
 
-import merge_search
+import merg_search
 
 
 
@@ -97,32 +97,31 @@ def main():
 
     queryImd = p.parse(title)
     
-    # searchers = [(searchPOM,'tomato'), (searchIMD,'imdb')]
-    # top_k = merg_search.aggregate_search(queryPom, searchers, 5)
+    searchers = [(searchPOM,'tomato'), (searchIMD,'imdb')]
+    top_k = merg_search.aggregate_search(queryPom, searchers, 5)
 
-    # with open('./test.txt', 'a') as openfile:
-    #     for i in top_k:
-    #         for j in i:
-    #             openfile.write(str(j)+ ' ')
-    #         openfile.write('\n')
+    with open('./test.txt', 'a') as openfile:
+        for i in top_k:
+            for j in i:
+                openfile.write(str(j)+ ' ')
+            openfile.write('\n')
 
 
-    resultsIMD = searchIMD.search(queryImd,terms=True, limit=20)
-    resultsPOM = searchPOM.search(queryPom, terms=True, limit=20)
+    # resultsIMD = searchIMD.search(queryImd,terms=True, limit=20)
+    # resultsPOM = searchPOM.search(queryPom, terms=True, limit=20)
 
-    if resultsIMD.has_matched_terms():
-        scores = []
-        for x in resultsIMD:
-            print(x["title"] + ' --> ' + str(x.score) + '\n')
-            scores.append(x.score)
-    print("-----------------------------")
-    if resultsPOM.has_matched_terms():
-        scores = []
-        for x in resultsPOM:
-            print(x["title"] + ' --> ' + str(x.score)+ '\n')
-            scores.append(x.score)
+    # if resultsIMD.has_matched_terms():
+    #     scores = []
+    #     for x in resultsIMD:
+    #         print(x["title"] + ' --> ' + str(x.score) + '\n')
+    #         scores.append(x.score)
+    # print("-----------------------------")
+    # if resultsPOM.has_matched_terms():
+    #     scores = []
+    #     for x in resultsPOM:
+    #         print(x["title"] + ' --> ' + str(x.score)+ '\n')
+    #         scores.append(x.score)
 
 
 
 main()
-
