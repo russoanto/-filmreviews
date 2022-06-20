@@ -16,6 +16,8 @@ from whoosh.index import open_dir
 from tqdm import tqdm
 import readchar
 
+import merge_search
+
 
 
 class FieldBoosterPlugin(Plugin):
@@ -54,8 +56,8 @@ def main():
 
     # imdb.get_all_information_t()
     # imdb.indexing()
-    pomodoro.scrape_all_information()
-    pomodoro.indexing()
+    # pomodoro.scrape_all_information()
+    # pomodoro.indexing()
     
     searchPOM = pomodoro.ix.searcher()
     searchIMD = imdb.ix.searcher()
@@ -63,7 +65,7 @@ def main():
     p = QueryParser(None, pomodoro.ix.schema, group=syntax.OrGroup)
     fieldboosts = {
             'title': 6,
-            'content':2,
+            'content':1,
     }
     mfp = MultifieldPlugin(('title', 'content', 'casts','directors'), fieldboosts=fieldboosts)
     p.add_plugin(mfp)
@@ -73,42 +75,51 @@ def main():
             'title':40, 'casts':40, 'release_date':40,'genres':40,'directors':40,'content':40,
     }))
     title = input('Inserire il parametro: ')
-    #query_txt = re.sub(r"\s+[1I]$", "", title.strip())
+    query_txt = re.sub("\s+[1I]$", "", title.strip())
 
-    queryPom = p.parse(title)
+    queryPom = p.parse(query_txt)
 
 
 # #--------------------------------------------------------
 
-    im = QueryParser(None, imdb.ix.schema, group=syntax.OrGroup)
-    fieldboosts = {
-            'title': 6,
-            'content':1,
-    }
-    mfp = MultifieldPlugin(('title', 'content', 'casts','directors'), fieldboosts=fieldboosts)
-    im.add_plugin(mfp)
+    # im = QueryParser(None, imdb.ix.schema, group=syntax.OrGroup)
+    # fieldboosts = {
+    #         'title': 6,
+    #         'content':1,
+    # }
+    # mfp = MultifieldPlugin(('title', 'content', 'casts','directors'), fieldboosts=fieldboosts)
+    # im.add_plugin(mfp)
 
 
-    p.add_plugin(FieldBoosterPlugin({
-            'title':40, 'casts':40, 'release_date':40,'genres':40,'directors':40,'content':40,
-    }))
+    # p.add_plugin(FieldBoosterPlugin({
+    #         'title':40,'content':40,'release_date':40,'genres':40,'directors':40,'casts':40,
+    # }))
 
-    queryImd = im.parse(title)
+    queryImd = p.parse(title)
+    
+    # searchers = [(searchPOM,'tomato'), (searchIMD,'imdb')]
+    # top_k = merg_search.aggregate_search(queryPom, searchers, 5)
+
+    # with open('./test.txt', 'a') as openfile:
+    #     for i in top_k:
+    #         for j in i:
+    #             openfile.write(str(j)+ ' ')
+    #         openfile.write('\n')
 
 
-    resultsIMD = searchIMD.search(queryImd,terms=True,limit=5)
-    resultsPOM = searchPOM.search(queryPom, terms=True,limit=5)
+    resultsIMD = searchIMD.search(queryImd,terms=True, limit=20)
+    resultsPOM = searchPOM.search(queryPom, terms=True, limit=20)
 
     if resultsIMD.has_matched_terms():
         scores = []
         for x in resultsIMD:
-            print(x["title"] + ' --> ' + x["casts"] + '\n')
+            print(x["title"] + ' --> ' + str(x.score) + '\n')
             scores.append(x.score)
     print("-----------------------------")
     if resultsPOM.has_matched_terms():
         scores = []
         for x in resultsPOM:
-            print(x["title"] + ' --> ' + x["casts"] + '\n')
+            print(x["title"] + ' --> ' + str(x.score)+ '\n')
             scores.append(x.score)
 
 
