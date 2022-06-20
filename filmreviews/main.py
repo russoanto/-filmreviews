@@ -16,7 +16,7 @@ from whoosh.index import open_dir
 from tqdm import tqdm
 import readchar
 
-import merg_search
+import merge_search
 
 
 
@@ -98,7 +98,7 @@ def main():
     queryImd = p.parse(title)
     
     searchers = [(searchPOM,'tomato'), (searchIMD,'imdb')]
-    top_k = merg_search.aggregate_search(queryPom, searchers, 5)
+    top_k = merge_search.aggregate_search(queryPom, searchers, 5)
 
     with open('./test.txt', 'a') as openfile:
         for i in top_k:
