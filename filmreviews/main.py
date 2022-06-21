@@ -1,3 +1,4 @@
+from operator import imod
 import tomatoes,movie_search,imdbClass
 import json
 import os
@@ -14,7 +15,6 @@ from whoosh.analysis import RegexTokenizer,StemFilter
 
 from whoosh.index import open_dir
 from tqdm import tqdm
-import readchar
 
 import merge_search
 
@@ -44,7 +44,24 @@ def compute_discounted_cumulative_gain(data):
         return 0
     return data[0] + sum([(data[i] / math.log(i + 1, 2)) for i in range(1, len(data))])
 
+def getInformation_indexing(imdb, pomodoro):
+    '''
+    Fa scraping e indexing delle due fonti, imdb e pomodoro.
+    '''
+    imdb.get_all_information_t()
+    imdb.indexing()
+    pomodoro.scrape_all_information()
+    pomodoro.indexing()
 
+def printInformation(result):
+    '''
+    stampa le informazioni della singola classe imdb o pomodoro
+    '''
+    if result.has_matched_terms():
+        scores = []
+        for x in result:
+            print(x["title"] + ' --> ' + str(x.score)+ '\n')
+            scores.append(x.score)
 def main():
 
     searcher = movie_search.movie_search()
@@ -54,10 +71,7 @@ def main():
 
     imdb = imdbClass.imdbIndex("./movies/index.json", data, "https://www.imdb.com")
 
-    # imdb.get_all_information_t()
-    # imdb.indexing()
-    # pomodoro.scrape_all_information()
-    # pomodoro.indexing()
+    #getInformation_indexing(imdb, pomodoro)
     
     searchPOM = pomodoro.ix.searcher()
     searchIMD = imdb.ix.searcher()
@@ -106,22 +120,12 @@ def main():
                 openfile.write(str(j)+ ' ')
             openfile.write('\n')
 
+    resultsIMD = searchIMD.search(queryImd,terms=True, limit=20)
+    resultsPOM = searchPOM.search(queryPom, terms=True, limit=20)
 
-    # resultsIMD = searchIMD.search(queryImd,terms=True, limit=20)
-    # resultsPOM = searchPOM.search(queryPom, terms=True, limit=20)
-
-    # if resultsIMD.has_matched_terms():
-    #     scores = []
-    #     for x in resultsIMD:
-    #         print(x["title"] + ' --> ' + str(x.score) + '\n')
-    #         scores.append(x.score)
-    # print("-----------------------------")
-    # if resultsPOM.has_matched_terms():
-    #     scores = []
-    #     for x in resultsPOM:
-    #         print(x["title"] + ' --> ' + str(x.score)+ '\n')
-    #         scores.append(x.score)
-
+    printInformation(resultsIMD)
+    printInformation(resultsPOM)
+    
 
 
 main()
