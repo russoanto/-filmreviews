@@ -221,8 +221,9 @@ class imdbIndex(imdb):
                     content = self.get_content(soup)
                     #print(durata + " " + genres + " " + rating + " \n" + content + "\n")
                 except:
-                    f.write(str(self.url))
-                    f.write('\n')
+                    # f.write(str(self.url))
+                    # f.write('\n')
+                    pass
                 ################################
                 reviews = []
                 try:
