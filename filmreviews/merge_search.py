@@ -7,14 +7,15 @@ from whoosh.searching import Searcher, Hit
 
 
 def random_access_score(query, searcher, uuid):
-    # Yes, I wrote this, but I think it's using arcane magic.
-    # Staring too deep into a dynamically-typed codebase does this, be warned.
     # On a serious note, this IS efficient, the first time AndMaybeMatcher is called
     # it skips all the others ids (it calls matcher.skip_to(docid))
     docid = searcher.document_number(id=uuid)
     if docid:
+        # Collect matches for each sub-searcher
         for subsearcher, offset in searcher.leaf_searchers():
+            #Returns a Matcher object you can use to retrieve documents and scores matching this query.
             m = query.matcher(subsearcher, context=searcher.context())
+            #Matches postings in the first sub-matcher, and if the same posting is in the second sub-matcher, adds their scores.
             m = AndMaybeMatcher(ListMatcher([docid], [0]), m)
             if m.is_active():
                 return m.id(), m.score()
@@ -63,7 +64,7 @@ class AggregateHit(NamedTuple):
     total_score: float
 
 
-def aggregate_search(query: Query, searchers_idxs: list[tuple[Searcher, str]], k: int, limit=math.inf) -> list[AggregateHit]:
+def aggregate_search(query, searchers_idxs, k, limit=math.inf):
     # Threshold algorithm
     
     results = []  # list[(result, searcher, index_name)]
@@ -75,12 +76,14 @@ def aggregate_search(query: Query, searchers_idxs: list[tuple[Searcher, str]], k
     topk = []
     # iterate for max length
     visited = set()
+    #max[len(res[0])] è probabilmente il numero di parametri massimo tra i due risultati (for sullo schema che ha più parametri)
     for i in range(max([len(res[0]) for res in results])):
         threshold = 0
         
         # compute one "row" of results at a time, ie: all first results, then all second results
         for res, searcher, index_name in results:
-            if i < len(res):
+            if i < len(res): 
+                
                 current_hit = res[i]
 
                 # update threshold
@@ -96,17 +99,23 @@ def aggregate_search(query: Query, searchers_idxs: list[tuple[Searcher, str]], k
                     doclist = [(current_hit, index_name)]  # type: list[tuple[Hit, str]]
                     index_count = 1
 
-                    for other_searcher, other_name in [src for src in searchers_idxs if src[0] != searcher]:
+                    sub_searcher_list = [] #contiene gli altri indici in cui controllare se un risultato è presente
+
+                    for src in searchers_idxs:
+                        if src[0] != searcher:
+                            sub_searcher_list.append(src) #tupla di (searcher, nome_idx) != da quello in cui siamo partiti
+
+                    for sub_searcher, sub_name in sub_searcher_list: #lista di nomi di indici che non siano quello che si sta visitando
                         # get doc id and score
-                        found_index, found_score = random_access_score(query, other_searcher, current_hit['id'])
+                        found_index, found_score = random_access_score(query, sub_searcher, current_hit['id'])
                         if found_index == -1:
                             continue  # Not present
                         # update score
                         top_score += found_score
                         index_count += 1
                         # find exact doc and append it
-                        el = other_searcher.ixreader.stored_fields(found_index)
-                        doclist.append((el, other_name))
+                        el = sub_searcher.ixreader.stored_fields(found_index) #elemento analogo di un altro indice
+                        doclist.append((el, sub_name))
                     
                     # insert into topk results
                     topk.append(AggregateHit(doclist, top_score / index_count))
