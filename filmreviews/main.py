@@ -1,26 +1,9 @@
-from operator import imod
-from posixpath import split
-#from turtle import st
-
-#from numpy import append
-import tomatoes,movie_search,imdbClass
-import json
-import os
-from concurrent import futures
-import time
-import re
-import math
-from whoosh import fields
-from whoosh import index
-from whoosh.fields import Schema
-from whoosh.index import Index, FileIndex
+import tomatoes,movie_search,imdbClass,merge_search
 from whoosh.qparser import syntax, Plugin, QueryParser, MultifieldPlugin
-from whoosh.analysis import RegexTokenizer,StemFilter
-
+import re
 from whoosh.index import open_dir
-from tqdm import tqdm
 
-import merge_search
+
 
 
 
@@ -91,11 +74,11 @@ def searchInIndex(queryPom, queryImd, searchPOM, searchIMD):
                 openfile.write(str(j)+ ' ')
             openfile.write('\n')
 
-    resultsIMD = searchIMD.search(queryImd,terms=True, limit=20)
-    resultsPOM = searchPOM.search(queryPom, terms=True, limit=20)
+    # resultsIMD = searchIMD.search(queryImd,terms=True, limit=20)
+    # resultsPOM = searchPOM.search(queryPom, terms=True, limit=20)
 
-    printInformation(resultsIMD)
-    printInformation(resultsPOM)
+    # printInformation(resultsIMD)
+    # printInformation(resultsPOM)
 
 def readLineBenchmark(pathBench):
     lines = []
