@@ -1,0 +1,2 @@
+- title:"Spider" OR title:"Iron man"
+- content:"Space" AND release_date:"2008"

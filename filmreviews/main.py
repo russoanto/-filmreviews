@@ -1,4 +1,8 @@
 from operator import imod
+from posixpath import split
+#from turtle import st
+
+#from numpy import append
 import tomatoes,movie_search,imdbClass
 import json
 import os
@@ -93,7 +97,37 @@ def searchInIndex(queryPom, queryImd, searchPOM, searchIMD):
     printInformation(resultsIMD)
     printInformation(resultsPOM)
 
-def main():
+def readLineBenchmark(pathBench):
+    lines = []
+    file = open(pathBench, 'r')
+    # check = file.readline()
+    count = 0
+    for i in file:
+        count += 1
+        if i.strip().split(' ')[0] == '-':
+            print("line{}: {}".format(count, i.strip()))
+            i = i.replace('\n', '')
+            i = i.replace('- ', '')
+            lines.append(i)
+    file.close()
+    return lines
+
+def writeLineBenchmark(pathBench, line, bench):
+    file = open(pathBench)
+    writeFile = open(pathBench.replace('.txt', '_out.txt'), 'w')
+    line = str(line)
+    bench = str(bench)
+    fAll = ''
+    for i in file:
+        fAll += i
+        if i.strip() == line:
+            writeFile.write(fAll.strip() + '\n# '+ bench + '\n-----------\n')
+            fAll = ''
+    writeFile.write(fAll)
+    writeFile.close()
+    file.close()
+
+def main(pathBench):
 
     searcher = movie_search.movie_search()
     data = searcher.readIndex()
@@ -120,15 +154,20 @@ def main():
     p.add_plugin(FieldBoosterPlugin({
             'title':40, 'casts':40, 'release_date':40,'genres':40,'directors':40,'content':40,
     }))
-    
-    inQuery = input('Inserire il parametro: ')
-    query_txt = re.sub("\s+[1I]$", "", inQuery.strip())
+    queryList = []
+    queryList = readLineBenchmark(pathBench)
+   # inQuery = input('Inserire il parametro: ')
+    for i in range(len(queryList)):
+        print(queryList[i])
+        query_txt = re.sub("\s+[1I]$", "", queryList[i].strip())
 
-    #elaboro query
-    queryPom = p.parse(query_txt)
-    queryImd = p.parse(inQuery)
-    
-    searchInIndex(queryPom, queryImd, searchPOM, searchIMD) #ricerca negli index richiama anche la funzione printInformation()
+        #elaboro query
+        queryPom = p.parse(query_txt)
+        queryImd = p.parse(queryList[i])
+
+        searchInIndex(queryPom, queryImd, searchPOM, searchIMD) #ricerca negli index richiama anche la funzione printInformation()
 
 
-main()
+# readLineBenchmark("benchmark/query.txt")
+# writeLineBenchmark("benchmark/query.txt", '- title:"Spiderman" OR title:"Iron man"', "hello")
+main("benchmark/query.txt")
