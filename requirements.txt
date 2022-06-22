@@ -2,4 +2,3 @@ whoosh
 bs4
 requests
 tqdm
-
