@@ -1,17 +1,13 @@
-# Uses 0-3 scoring
+# trova spider-man
+query: title:"Spider"
+3 9613    # Spider
+2 634649   #Spider-Man: Homecoming
+2 315635 #Spider-Man: No Way Home
+1 11703  #Kiss of the Spider Woman
 
-# Simple query
-# UIN: Find me "spider"
-query title:"Spider"
-3 imdb 9613    # Spider
-2 imdb 634649   #Spider-Man: Homecoming
-2 imdb 315635 #Spider-Man: No Way Home
-1 imdb 11703  #Kiss of the Spider Woman
-
-# Simple query
-# UIN: Film di tarantino
-query directors:"Tarantino" AND casts:"Jackson"
-3 imdb 68718   # Django
-2 imdb 634649   #
-2 imdb 315635 #Spider-Man: No Way Home
-1 imdb 11703  #Kiss of the Spider Woman
+# film diretti da tarantino con samuel jackson
+query: directors:"Tarantino" AND casts:"Jackson"
+3 68718   # Django
+2 634649   #
+2 315635 #Spider-Man: No Way Home
+1 11703  #Kiss of the Spider Woman
