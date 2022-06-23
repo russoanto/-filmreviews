@@ -74,14 +74,14 @@ def searchInIndex(queryPom, queryImd, searchPOM, searchIMD):
             for j in i:
                 openfile.write(str(j)+ ' ')
             openfile.write('\n')
-    
-    return top_k    #lo ha messo pesto perchè gli serve per la sua stampa bella
 
     # resultsIMD = searchIMD.search(queryImd,terms=True, limit=20)
     # resultsPOM = searchPOM.search(queryPom, terms=True, limit=20)
 
     # printInformation(resultsIMD)
     # printInformation(resultsPOM)
+    
+    return top_k    #lo ha messo pesto perchè gli serve per la sua stampa bella
 
 def readLineBenchmark(pathBench):
     lines = []
@@ -118,7 +118,7 @@ def niceprint(top_k):
     #ogni elemento di topk è aggregatehit dove ho la lista delle hit e punteggio già ordinato
 
     #attualmente prendo solo u valori più lunghi per fare il marge, ma volevo farvelo vedere cosi mi dite se c'è altro da modificare
-    with open('./file2.txt', 'w') as openfile:
+    with open('./file2.txt', 'a') as openfile:
         for agghit in top_k:
             #devo mettere assieme
             #e preparare una lista di risultati dove ho le info
@@ -148,11 +148,20 @@ def niceprint(top_k):
 
             a = mergeSameHit(hitlist)
             for z in a:
-                openfile.write(str(a[z]))  
+                if z == 'reviews':
+                    openfile.write(z + ":\n" + replaceReviews(a[z]))
+                else:
+                    openfile.write(z + ":\n" + str(a[z]))  
                 openfile.write("\n")
             
-            openfile.write("---------------------------\n")   
-            
+            openfile.write("---------------------------\n")  
+
+def replaceReviews(s):
+    s = str(s)
+    s = s.replace("\\'", "'").replace("\\n", '\n')
+    s = s.replace("[['", "\'").replace("[[\"", "\"").replace("\"]]", "\"").replace("']]", "\'")
+    s = s.replace("[\'", "'").replace("[\"", "\"").replace("\"]", "\"").replace("\']", "\'")    
+    return s
 
 
 def mergeSameHit(hitlist):
@@ -226,7 +235,7 @@ def main(pathBench):
 
         top_k=searchInIndex(queryPom, queryImd, searchPOM, searchIMD) #ricerca negli index richiama anche la funzione printInformation()
 
-    niceprint(top_k)  
+        niceprint(top_k)  
 
 # readLineBenchmark("benchmark/query.txt")
 # writeLineBenchmark("benchmark/query.txt", '- title:"Spiderman" OR title:"Iron man"', "hello")
