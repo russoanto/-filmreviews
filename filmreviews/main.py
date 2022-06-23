@@ -4,7 +4,7 @@ import re
 from whoosh.index import open_dir
 import tqdm
 from benchmark import parse_suite
-from benchmark import BenchmarkSuite,BenchmarkResult
+from benchmark import BenchmarkSuite,BenchmarkResult,BenchmarkEntry
 import argparse
 import math
 
@@ -38,18 +38,19 @@ def niceprint(top_k):
                 hit = hitstr[0]
 
                 hitlist.append(hit)
-               
-               
-                
-                """ for k,v in hit.items():
-                    print(k,v)
-                    print("\n\n\n") """
 
             a = mergeSameHit(hitlist)
             
-            param =["id", "title","genres", "content", "directors", "casts", "release_date", "runtime","rating"]
+            param =["id", "title","genres", "content", "directors", "casts", "release_date", "runtime","reviews"]
+            answare = input('vuoi stampare le recensioni per',a["title"],'? (si = 1): ')
             for i in param:
-                print(i + ': ' + str(a[i]))
+                if i != "reviews":
+                    print(i + ': ' + str(a[i]))
+                elif answare == 1:
+                    print(i + ': ' + str(a[i]))
+    
+
+            print("----------------------------")
             # for z in a:
                 
             #     if z == 'reviews':
@@ -60,7 +61,7 @@ def niceprint(top_k):
             #         openfile.write(z + ": " + str(a[z]))  
             #     openfile.write("\n")
             
-            openfile.write("---------------------------\n")  
+            #openfile.write("---------------------------\n")  
 
 
 
@@ -110,28 +111,19 @@ def mergeSameHit(hitlist):
 #######################################################
 
 class FieldBoosterPlugin(Plugin):
-        #boosts: Dict[str, float]
-
         def __init__(self, boosts):
             self.boosts = boosts
 
         def filters(self, parser):
-            # Run just before MultifieldPlugin (110)
             return [(self.do_boost, 105)]
 
         def do_boost(self, parser, group):
             for i, node in enumerate(group):
                 if isinstance(node, syntax.GroupNode):
-                    # Recurse inside groups
                     group[i] = self.do_boost(parser, node)
                 elif node.has_fieldname and node.fieldname is not None:
                     node.set_boost(node.boost * self.boosts.get(node.fieldname, 1.0))
             return group
-
-def compute_discounted_cumulative_gain(data):
-    if len(data) == 0:
-        return 0
-    return data[0] + sum([(data[i] / math.log(i + 1, 2)) for i in range(1, len(data))])
 
 def getInformation_indexing(get):
     '''
@@ -209,47 +201,16 @@ def searchInIndex(queryPom, queryImd, searchPOM, searchIMD):
 
     return top_k
 
-def readLineBenchmark(pathBench):
-    lines = []
-    file = open(pathBench, 'r')
-    # check = file.readline()
-    count = 0
-    for i in file:
-        count += 1
-        if i.strip().split(' ')[0] == '-':
-            print("line{}: {}".format(count, i.strip()))
-            i = i.replace('\n', '')
-            i = i.replace('- ', '')
-            lines.append(i)
-    file.close()
-    return lines
-
-def writeLineBenchmark(pathBench, line, bench):
-    file = open(pathBench)
-    writeFile = open(pathBench.replace('.txt', '_out.txt'), 'w')
-    line = str(line)
-    bench = str(bench)
-    fAll = ''
-    for i in file:
-        fAll += i
-        if i.strip() == line:
-            writeFile.write(fAll.strip() + '\n# '+ bench + '\n-----------\n')
-            fAll = ''
-    writeFile.write(fAll)
-    writeFile.close()
-    file.close()
-
-
-
 def evaluate(suite,pomodoro, imdb):
-    print(suite.benchmarks)
+    #print(suite.benchmarks)
     res = []
     for bench in suite.benchmarks:
+        print(bench)
         topk = run_query(bench.query,pomodoro,imdb,10)
-        data = {(s.source, s.id): s.relevance for s in bench.scores}
+        data = {s.id:s.relevance for s in bench.scores}
         entries = []
         for row in topk:
-            relevance = next((d for hit, source in row.hits if (d := data.get((source, hit['id']))) is not None), 0)
+            relevance = next((d for hit, source in row.hits if (d := data.get(hit['id'])) is not None), 0)
             entries.append(relevance)
         res.append(BenchmarkResult(bench, entries))
     return res
@@ -300,13 +261,14 @@ def main(pathBench):
         for el in res:
             print(f"{el.query.query} : {[x.relevance for x in el.query.scores]} {el.raw}")
 
-            # DCG
-            val = compute_discounted_cumulative_gain(el.raw)
+
+            # DCG = r1 + r2/log_2(2) + r3/log_3(3) etc ...
+            val = BenchmarkResult.compute_discounted_cumulative_gain(el.raw)
             print(f"DCG: {val}")
 
             # IDEAL DCG
             ideal_list = sorted([x.relevance for x in el.query.scores], reverse=True)
-            val_ideal = compute_discounted_cumulative_gain(ideal_list)
+            val_ideal = BenchmarkResult.compute_discounted_cumulative_gain(ideal_list)
 
             print(f"IDEAL DCG: {val_ideal}")
             print(f"NDCG: {val/val_ideal}")
@@ -359,8 +321,8 @@ def main(pathBench):
             quit()
 
 
-        resultPOM = searchPOM.search(query, terms=True, limit=5)
-        resultIMD = searchIMD.search(query, terms=True, limit=5)
+        resultPOM = searchPOM.search(query, terms=True, limit=10)
+        resultIMD = searchIMD.search(query, terms=True, limit=10)
 
         print("POMODORO")
         printInformation(resultPOM)
