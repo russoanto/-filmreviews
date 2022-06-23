@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import TextIO, Optional
+import math
 
 import re
 
@@ -7,7 +8,6 @@ import re
 @dataclass
 class BenchmarkEntry:
     relevance: int
-    source: str
     id: str
 
 
@@ -26,15 +26,20 @@ class BenchmarkSuite:
 class BenchmarkResult:
     query: Benchmark
     raw: list[int]
+    @staticmethod
+    def compute_discounted_cumulative_gain(data):
+        if len(data) == 0:
+            return 0
+        return data[0] + sum([(data[i] / math.log(i + 1, 2)) for i in range(1, len(data))])
 
 
 # query portal 2 # comment
-QUERY_REGEX = re.compile(r'^query\s+([^#]+?)\s*(?:#.*)?$', re.IGNORECASE)
+QUERY_REGEX = re.compile(r'^query:\s+([^#]+?)\s*(?:#.*)?$', re.IGNORECASE)
 # 3 steam 24201 # comment
-ENTRY_REGEX = re.compile(r'^(\d+)\s+(\w+)\s+(\w+)\s*(?:#.*)?$')
+ENTRY_REGEX = re.compile(r'^(\d+)\s+(\w+)\s*(?:#.*)?$')
 
 
-def parse_suite(lines: TextIO) -> BenchmarkSuite:
+def parse_suite(lines):
     res: list[Benchmark] = []
     query: Optional[str] = None
     entries: list[BenchmarkEntry] = []
@@ -57,8 +62,8 @@ def parse_suite(lines: TextIO) -> BenchmarkSuite:
             if query is None:
                 raise ValueError(f"Found entry before any query at line {rown}")
 
-            rel, source, doc_id = match.groups()
-            entries.append(BenchmarkEntry(int(rel), source, doc_id))
+            rel, doc_id = match.groups()
+            entries.append(BenchmarkEntry(int(rel), doc_id))
         else:
             raise ValueError(f"Cannot read benchmark file! syntax error at line {rown}")
 
