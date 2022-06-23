@@ -167,7 +167,8 @@ class indexTomatoes(tomatoes):
         for i in range(len(data["movies"])):
             self.films.append({'id':data["movies"][i]["id"],'title':data["movies"][i]["title"],'date':data["movies"][i]["release_date"]})
 
-    def scrape_all_information(self):
+    #def scrape_all_information(self):
+    def get_all_information_t(self):    
         with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
             executor.map(self.get_all_information, self.films)
 
