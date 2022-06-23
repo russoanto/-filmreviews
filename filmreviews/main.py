@@ -80,7 +80,7 @@ def searchInIndex(queryPom, queryImd, searchPOM, searchIMD):
 
     # printInformation(resultsIMD)
     # printInformation(resultsPOM)
-    
+
     return top_k    #lo ha messo pesto perchè gli serve per la sua stampa bella
 
 def readLineBenchmark(pathBench):
@@ -183,14 +183,18 @@ def mergeSameHit(hitlist):
             res[k1] = v1
         else:
             #qua sono sicuro di dover fare magheggi
-        
+            if k1 == "reviews":
+                #res[k1] = "lol"
+                res[k1] = hitlist[0]["reviews"] + hitlist[1]["reviews"]
+                # print("tot  ",len(res[k1]))
+                # print("------------\n")
+
             if(len(hitlist[0][k1])>len(v1)):
                 res[k1]=hitlist[0][k1]
             else:
                 res[k1]=v1
 
     return res        
-
 
 def main(pathBench):
 
