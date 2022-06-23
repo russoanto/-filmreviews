@@ -1,6 +1,7 @@
+from urllib3 import Retry
 import tomatoes,movie_search,imdbClass,merge_search
 from whoosh.qparser import syntax, Plugin, QueryParser, MultifieldPlugin
-import re
+import re , math
 from whoosh.index import open_dir
 
 
@@ -73,6 +74,8 @@ def searchInIndex(queryPom, queryImd, searchPOM, searchIMD):
             for j in i:
                 openfile.write(str(j)+ ' ')
             openfile.write('\n')
+    
+    return top_k    #lo ha messo pesto perchè gli serve per la sua stampa bella
 
     # resultsIMD = searchIMD.search(queryImd,terms=True, limit=20)
     # resultsPOM = searchPOM.search(queryPom, terms=True, limit=20)
@@ -110,6 +113,76 @@ def writeLineBenchmark(pathBench, line, bench):
     writeFile.close()
     file.close()
 
+
+def niceprint(top_k):
+    #ogni elemento di topk è aggregatehit dove ho la lista delle hit e punteggio già ordinato
+
+    #attualmente prendo solo u valori più lunghi per fare il marge, ma volevo farvelo vedere cosi mi dite se c'è altro da modificare
+    with open('./file2.txt', 'w') as openfile:
+        for agghit in top_k:
+            #devo mettere assieme
+            #e preparare una lista di risultati dove ho le info
+            #sono già ordinate quindi mi basta fare degli append
+            #trama più lubnga
+            #recensioni metto assieme
+            #durata 1 sola
+            #genres (soluzione bonus)
+            #attori e cast, regista(soluzione bonus)
+            
+            #score = agghit[1]
+
+            hitlist = []
+            #hitlist.clear()
+            for hitstr in agghit[0]:
+                
+                
+                hit = hitstr[0]
+
+                hitlist.append(hit)
+               
+               
+                
+                """ for k,v in hit.items():
+                    print(k,v)
+                    print("\n\n\n") """
+
+            a = mergeSameHit(hitlist)
+            for z in a:
+                openfile.write(str(a[z]))  
+                openfile.write("\n")
+            
+            openfile.write("---------------------------\n")   
+            
+
+
+def mergeSameHit(hitlist):
+    
+    if(len(hitlist)==1):
+        return hitlist[0]
+    
+    res = dict()
+    #metto tutti quelli che non ci sono tra uno e l'altro
+    #print(len(hitlist[1]))
+    for k0,v0 in hitlist[0].items(): 
+
+        if k0 not in res:
+            res[k0] = v0
+    
+    
+    for k1,v1 in hitlist[1].items():
+        if k1 not in res:
+            res[k1] = v1
+        else:
+            #qua sono sicuro di dover fare magheggi
+        
+            if(len(hitlist[0][k1])>len(v1)):
+                res[k1]=hitlist[0][k1]
+            else:
+                res[k1]=v1
+
+    return res        
+
+
 def main(pathBench):
 
     searcher = movie_search.movie_search()
@@ -140,6 +213,9 @@ def main(pathBench):
     queryList = []
     queryList = readLineBenchmark(pathBench)
    # inQuery = input('Inserire il parametro: ')
+
+    top_k = []
+
     for i in range(len(queryList)):
         print(queryList[i])
         query_txt = re.sub("\s+[1I]$", "", queryList[i].strip())
@@ -148,8 +224,9 @@ def main(pathBench):
         queryPom = p.parse(query_txt)
         queryImd = p.parse(queryList[i])
 
-        searchInIndex(queryPom, queryImd, searchPOM, searchIMD) #ricerca negli index richiama anche la funzione printInformation()
+        top_k=searchInIndex(queryPom, queryImd, searchPOM, searchIMD) #ricerca negli index richiama anche la funzione printInformation()
 
+    niceprint(top_k)  
 
 # readLineBenchmark("benchmark/query.txt")
 # writeLineBenchmark("benchmark/query.txt", '- title:"Spiderman" OR title:"Iron man"', "hello")
