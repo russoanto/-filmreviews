@@ -1,17 +1,46 @@
 # trova spider-man
-query: title:"Spider"
+query-> title:"Spider"
 3 9613    # Spider
 2 634649   #Spider-Man: Homecoming
 2 315635 #Spider-Man: No Way Home
 1 11703  #Kiss of the Spider Woman
 
 # film diretti da tarantino con samuel jackson
-query: directors:"Tarantino" AND casts:"Jackson"
+query-> directors:"Tarantino" AND casts:"Jackson"
 3 68718   # Django
-2 634649   #
+2 634649  #
 2 315635 #Spider-Man: No Way Home
 1 11703  #Kiss of the Spider Woman
 
-query: directors:"Sorrentino" OR title:"Sex"
+#film di sorrentini oppure i titoli con the king nel titolo
+query-> directors:"Sorrentino" OR title:"The King"
 3 722778  #The Hand of God
+
+#Con i nomi dei film che hanno The lost city
+query-> title:"The Lost City"
+2 650 #Boyz n the Hood - pomodoro
+3 300672 #Vincent N Roxxy - pomodoro
+5 389015 #I, Tonya - imdb
+
+#i film che vanno dall'anno 2014 al 2022 ed un cast che in cui un nome/cognome ha almeno ada
+query-> release_date:[2014 TO 2022] AND casts:Ada*
+1 791570 #Suicide Forest Village - imdb
+3 402897 #The Death of Stalin - pomodoro
+2 638534 #The White Tiger - imdb
+
+#i film con un nome/cognome con ada o un director con almeno una s nel nome/cognome
+query-> casts:Ada* OR directors:S*
+1 373314 #Misconduct - tomato
+3 18939 #Little Otik - tomato
+2 473033 #Uncut Gems - imdb
+
+#
+query->content:"belive love"~2
+
+
+#
+query-> casts:"Adam sandler" AND NOT genres:"comedy"
+3 2355 #Reign Over Me - tomato
+1 473033 #Uncut Gems - imdb
+2 2355 #Reign Over Me - imdb
 
