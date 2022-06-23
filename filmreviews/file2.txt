@@ -1,0 +1,55 @@
+title: Spider
+content: A mentally disturbed man takes residence in a halfway house. His mind gradually slips back into the realm created by his illness, where he replays a key part of his childhood.
+
+casts: Ralph Fiennes,Miranda Richardson,Gabriel Byrne
+directors: David Cronenberg
+genres: Drama,Mystery,Thriller
+id: 9613
+release_date: 2002
+
+runtime: 1h 38m
+
+rating: 6.8
+---------------------------
+casts: Jacob Jarek,Calle Marthin,Sol Bondy,Hayedeh Safiyari,Fred Burle,Peter Possne,Lina Nordqvist,Pascal Caucheteux,Eva Åkergren,Vincent Maraval,Ali Abbasi,Zar Amir Ebrahimi,Nadim Carlsen,Martin Dirkov,Sara Fazilat,Olivia Neergaard-Holm,Ditte Milsted,Arash Ashtiani,Grégoire Sorlat,Nima Akbarpour,Zahra Amir Ebrahimi,Olivier Père
+content: In HOLY SPIDER, we follow family man Saeed as he embarks on his own religious quest -- to "cleanse" the holy Iranian city of Mashhad of immoral and corrupt street prostitutes. After murdering several women, he grows ever more desperate about the lack of public interest in his divine mission.
+directors: Ali Abbasi
+genres:  Crime Drama Mystery & thriller
+id: 889699
+release_date: 
+
+runtime:  1h 55m
+title: Holy Spider
+---------------------------
+casts: Emilia Clarke,Sam Claflin,Janet McTeer
+content: A girl in a small town forms an unlikely bond with a recently-paralyzed man she's taking care of.
+directors: Thea Sharrock
+genres: Drama,Romance
+id: 315635
+rating: 7.4
+release_date: 2017
+
+runtime: 1h 46m
+title: Spider-Man: Homecoming
+---------------------------
+0 casts: Nuno Leal Maia,Raul Julia,Herson Capri,Wally Badarou,William Hurt,Milton Gonçalves,Hector Babenco,Antonio Petrim,José Lewgoy,Nildon Parrente,Francisco Ramalho Jr.,Rodolfo Sanchez,Patricio Bisso,Felipe Crescenti,Mauro Alice,Denise Dumont,Clóvis Bueno,Leonard Schrader,John Neschling,Manuel Puig,Sonia Braga,David Weisman
+1 content: In a prison cell somewhere in Latin America, two very different men warily confront each other. Molina (William Hurt) is first seen wrapping his head in a towel, in the shape of a turban, while Valentin (Raul Julia), bearded and classically macho in appearance, watches with a mixture of fascination and revulsion. During the time spent together, the two men come to understand and respect each other.
+2 directors: Hector Babenco
+3 genres:  Drama
+4 id: 11703
+5 release_date:  Jul 22, 2008
+6
+7 runtime:  1h 59m
+8 title: Kiss of the Spider Woman
+9 rating: 7.3
+---------------------------
+casts: Eduardo de Gregorio,Marilu Parolini,Roberto Perpignani,Giulio Brogi,Bernardo Bertolucci,Giovanni Bertolucci,Tino Scotti,Pippo Campanini,Franco Di Giacomo,Franco Giovanelli,Alida Valli,Maria Paola Maino,Vittorio Storaro
+content: In Italy, Athos Magnani (Giulio Brogi) is the son of an anti-fascist hero who was assassinated three decades earlier. When the dead man's former mistress (Alida Valli) calls him back to his father's hometown, Athos has a number of perplexing, surreal encounters with her and the men who were his father's allies long ago. But were they really allies? As he tries to unravel the mystery of his father's murder, the son is forced to reckon with the nature of compromised ideals.
+directors: Bernardo Bertolucci
+genres:  Mystery & thriller
+id: 42595
+release_date: 
+
+runtime:  1h 40m
+title: The Spider's Stratagem
+---------------------------

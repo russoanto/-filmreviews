@@ -3,9 +3,9 @@ import json
 from bs4 import BeautifulSoup
 import movie_search
 import concurrent.futures
-import threading
 import time
 import random
+import whoosh
 from whoosh import fields
 from whoosh import index
 from whoosh.fields import Schema

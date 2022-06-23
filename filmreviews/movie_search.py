@@ -21,9 +21,13 @@ url = "https://advanced-movie-search.p.rapidapi.com/genre/movie/list"
 # 	"X-RapidAPI-Key": "5a0d0d71a7msh325031a0ddf7fc8p1ee1e2jsn0efd03be1707"
 # }
 
+# headers = {
+# 	"X-RapidAPI-Host": "advanced-movie-search.p.rapidapi.com",
+# 	"X-RapidAPI-Key": "59124b1fbdmsh7cb07020705c585p11f13ejsn635ddd484fd0"
+# }
 headers = {
-	"X-RapidAPI-Host": "advanced-movie-search.p.rapidapi.com",
-	"X-RapidAPI-Key": "59124b1fbdmsh7cb07020705c585p11f13ejsn635ddd484fd0"
+    'X-RapidAPI-Host': 'advanced-movie-search.p.rapidapi.com',
+    'X-RapidAPI-Key': '199298160dmsh4f97c732b46c24cp1a2627jsn9a9b130f629c'
 }
 
 
