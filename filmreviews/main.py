@@ -42,13 +42,13 @@ def niceprint(top_k):
             a = mergeSameHit(hitlist)
             
             param =["id", "title","genres", "content", "directors", "casts", "release_date", "runtime","reviews"]
-            answare = input('vuoi stampare le recensioni per',a["title"],'? (si = 1): ')
+            answare = input('vuoi stampare le recensioni per ' + str(a["title"]) + '? (si = 1): ')
             for i in param:
                 if i != "reviews":
-                    print(i + ': ' + str(a[i]))
-                elif answare == 1:
-                    print(i + ': ' + str(a[i]))
-    
+                    print(i + ': ' + str(a[i]) + '\n')
+                elif answare == "1":
+                    print(i + ': ' + replaceReviews(str(a[i])) + '\n')
+
 
             print("----------------------------")
             # for z in a:
