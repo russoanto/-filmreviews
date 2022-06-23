@@ -11,3 +11,7 @@ query: directors:"Tarantino" AND casts:"Jackson"
 2 634649   #
 2 315635 #Spider-Man: No Way Home
 1 11703  #Kiss of the Spider Woman
+
+query: directors:"Sorrentino" OR title:"Sex"
+3 722778  #The Hand of God
+
