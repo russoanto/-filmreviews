@@ -213,7 +213,7 @@ class indexTomatoes(tomatoes):
                 #print(film_schema["casts"])
 
         else:
-            richiesta = requests.get(self.url+name+'_'+date)
+            richiesta = requests.get(self.url+name+'_'+param[1])
             if richiesta.status_code != 404:
                 soup = BeautifulSoup(richiesta.content, 'html.parser')
                 param.append(soup)
