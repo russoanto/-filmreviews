@@ -35,8 +35,8 @@ query-> casts:Ada* OR directors:S*
 2 473033 #Uncut Gems - imdb
 
 #
-query->content:"belive love"~2
-
+query-> content:"belive love"~2
+0 0 
 
 #
 query-> casts:"Adam sandler" AND NOT genres:"comedy"
