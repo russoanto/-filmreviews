@@ -153,9 +153,9 @@ def create_parser(idx):
     return p
 
 
-def searchInIndex(query,searchPOM, searchIMD):
+def searchInIndex(query,searchPOM, searchIMD, k: int = 5):
     searchers = [(searchPOM,'tomato'), (searchIMD,'imdb')]
-    top_k = merge_search.aggregate_search(query, searchers, 5)
+    top_k = merge_search.aggregate_search(query, searchers, k)
     return top_k
 
 def evaluate(suite,pomodoro, imdb):
