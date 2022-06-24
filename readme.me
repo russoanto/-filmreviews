@@ -1,0 +1,25 @@
+
+
+
+Prima di poter utilizzare il programma è necessario installare i vari moduli python. Tutti i moduli necessari sono nel file "filmreviews/requirements.txt". Per installarli tutti, eseguire il comando "pipenv install -r requirements.txt".
+
+Tutte le varie funzionalità offerte dal programma sono accessibili da main.py tramite opportuni parametri.
+I parametri utilizzabili sono:
+-indexing
+ 	permette di ricreare l'index di una fonte specifica o di tutte.
+-benchmark
+	permette di eseguire i benchmark su alcune query presenti nel file query_benchmark (leggere in seguito per maggiori informazioni)
+-(nessun parametro)
+	permette di utilizzare l'index già creato per eseguiore delle query inseribili da linea di comando e ottenere i documenti rilevanti con il loro score, per ogni.
+
+
+files rilevanti:
+-query_benchmark
+	presenta 10 diverse query eseguite sull'index. Per le query sono state utillizate tutte le peculiarità del nostro query language (whoosh query language).
+	per ogni query vengono riportati i documenti (film) che dovrebbero soddisfare la query.
+	Per ognuno di questi documenti è stato inoltre riportato l'id nell'index e un punteggio (da 1 a 3) che rappresenta la rilevanza.
+-requirements.txt
+	contiene tutti i moduli python da installare per il corretto funzionamento del programma.
+
+
+
