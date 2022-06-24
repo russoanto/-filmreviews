@@ -34,7 +34,7 @@ class BenchmarkResult:
 
 
 # query portal 2 # comment
-QUERY_REGEX = re.compile(r'^query:\s+([^#]+?)\s*(?:#.*)?$', re.IGNORECASE)
+QUERY_REGEX = re.compile(r'^query->\s+([^#]+?)\s*(?:#.*)?$', re.IGNORECASE)
 # 3 steam 24201 # comment
 ENTRY_REGEX = re.compile(r'^(\d+)\s+(\w+)\s*(?:#.*)?$')
 
