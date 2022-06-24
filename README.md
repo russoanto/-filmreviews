@@ -20,7 +20,14 @@ Come detto in precedenza questo progetto fa uso di pipenv, quindi una volta inst
 $ cd filmreviews/
 $ pipenv install -r requirements.txt
 ```
-In questo modo abbiamo un ambiente virtuale con tutte le dipendenze del progetto
+In questo modo abbiamo un ambiente virtuale con tutte le dipendenze del progetto.
+Se ci sono problemi durante la crazione del virtual environment a causa della versione di python è possibile cambiarla manualmente modificando il file Pipenv. Come specificato in precedenza la versione minima su cui è stato testato è su python 3.9 
+
+Se si vuole eseguire un installazione automatizzata si può lanciare il seguente comando da una console bash
+
+```bash
+$ bash installUpdate.sh
+```
 
 ### Running
 
@@ -39,3 +46,10 @@ $ python filmreviews/main.py  indexing
 $ python filmreviews/main.py benchmark  filmreviews/query_benchmark
 ```
 3. di default se non siinseriscono parametri sarà possibile effettuare una ricerca mediante il linguaggio di interrogazione definito
+
+
+Per eseguire un processo di esecuzione automatizzato (ricerca query -> benchmark) si può lanciare il seguente comando da una console bash:
+
+```bash
+$ bash executePython.sh
+```
