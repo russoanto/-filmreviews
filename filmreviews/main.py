@@ -2,7 +2,7 @@ import tomatoes,movie_search,imdbClass,merge_search
 from whoosh.qparser import syntax, Plugin, QueryParser, MultifieldPlugin
 import re
 from whoosh.index import open_dir
-import tqdm
+from tqdm import tqdm
 from setup_benchmark import parse_suite
 from setup_benchmark import BenckmarkList,BenchmarkResult,RelevantDocument
 import argparse
@@ -124,7 +124,7 @@ def run_query(query_txt, pomodoro,imdb, k: int = 5):
     p = create_parser(pomodoro)
     query = p.parse(query_txt)
     searchers = [(searchPOM,'tomato'), (searchIMD,'imdb')]
-    topk_results = merge_search.aggregate_search(query, searchers, 6)
+    topk_results = merge_search.aggregate_search(query, searchers, k)
 
     return topk_results
 
@@ -153,15 +153,16 @@ def searchInIndex(query,searchPOM, searchIMD):
     return top_k
 
 def evaluate(suite,pomodoro, imdb):
+
     res = []
-    for bench in suite.benchmarks:
-        topk = run_query(bench.query,pomodoro,imdb,10)
+    for i in tqdm(range(len(suite.benchmarks))):
+        bench = suite.benchmarks[i]
+        topk = run_query(bench.query,pomodoro,imdb,6)
         # per ogni query salvo id dei documenti rilevanti con relativo score
         data = {s.id:s.relevance for s in bench.scores} 
         entries = []
         for row in topk:
             relevance = next((d for hit, source in row.hits if (d := data.get(hit['id'])) is not None), 0)
-            #print(type(relevance))
             entries.append(relevance)
         res.append(BenchmarkResult(bench, entries))
     return res
@@ -214,46 +215,48 @@ def main():
         interp_precisions = [0] * 10
         
         for el in res:
-            print(f"{el.query.query} : {[x.relevance for x in el.query.scores]} {el.raw}")
+            print(el.results_point)
+            print(f"{el.query.query} : {[x.relevance for x in el.query.scores]} {el.results_point}")
 
             # DCG = r1 + r2/log_2(2) + r3/log_3(3) etc ...
-            val = BenchmarkResult.compute_discounted_cumulative_gain(el.raw)
+            val = BenchmarkResult.compute_discounted_cumulative_gain(el.results_point)
            
 
             # IDEAL DCG (viene fatto)
             ideal_list = sorted([x.relevance for x in el.query.scores], reverse=True)
-            print(ideal_list)
             val_ideal = BenchmarkResult.compute_discounted_cumulative_gain(ideal_list)
             if val_ideal != 0:
-                print(f"DCG: {val}")
-                print(f"IDEAL DCG: {val_ideal}")
-                print(f"NDCG: {val/val_ideal}")
+                # print(f"DCG: {val}")
+                # print(f"IDEAL DCG: {val_ideal}")
+                # print(f"NDCG: {val/val_ideal}")
 
-                # # NATURAL PRECISION
-                # natural_pr = []
-                # tot_rel = sum([x.relevance >= RELEVANCE_THRESHOLD for x in el.query.scores])
-                # for i, entry in enumerate(el.raw):
-                #     if entry >= RELEVANCE_THRESHOLD:
-                #         precision = (len(natural_pr) + 1)/(i + 1)
-                #         natural_pr.append(precision)
-                # print("Natural precision: ")
-                # print(" | ".join([f"{(i + 1) / tot_rel}:{value}" for i, value in enumerate(natural_pr)]))
+                # NATURAL PRECISION
 
-                # # STANDARD PRECISION
-                # precisions = [0.0] * 10
-                # for i in range(10):
-                #     maxval = max([value for j, value in enumerate(natural_pr) if (j + 1) / tot_rel >= (i + 1) / 10], default=0)
-                #     precisions[i] = maxval
-                #     interp_precisions[i] += maxval
-                # print("Standard precision: ")
-                # print(" | ".join([f"{(i+1)/10}:{value}" for i, value in enumerate(precisions)]))
+                natural_pr = []
+                tot_rel = sum([x.relevance >= RELEVANCE_THRESHOLD for x in el.query.scores])
+                for i, entry in enumerate(el.results_point):
+                    if entry >= RELEVANCE_THRESHOLD:
+                        precision = (len(natural_pr) + 1)/(i + 1)
+                        natural_pr.append(precision)
 
-                # avg_prc = sum(natural_pr) / tot_rel
-                # print(f"Average non-interpolated precision: {avg_prc}")
+                print("Natural precision: ")
+                print(" | ".join([f"{(i + 1) / tot_rel}:{value}" for i, value in enumerate(natural_pr)]))
 
-                # avg_int_prc = sum(precisions) / 10
-                # avg_precisions.append(avg_int_prc)
-                # print(f"Average interpolated precision: {avg_int_prc}")
+                # STANDARD PRECISION
+                precisions = [0.0] * 10
+                for i in range(10):
+                    maxval = max([value for j, value in enumerate(natural_pr) if (j + 1) / tot_rel >= (i + 1) / 10], default=0)
+                    precisions[i] = maxval
+                    interp_precisions[i] += maxval
+                print("Standard precision: ")
+                print(" | ".join([f"{(i+1)/10}:{value}" for i, value in enumerate(precisions)]))
+
+                avg_prc = sum(natural_pr) / tot_rel
+                print(f"Average non-interpolated precision: {avg_prc}")
+
+                avg_int_prc = sum(precisions) / 10
+                avg_precisions.append(avg_int_prc)
+                print(f"Average interpolated precision: {avg_int_prc}")
             else:
                 print("Nessun risultato ottenuto")
             print("\n")
