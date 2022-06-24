@@ -2,3 +2,6 @@ whoosh
 bs4
 requests
 tqdm
+numpy
+argparse
+matplotlib
