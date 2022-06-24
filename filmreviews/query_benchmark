@@ -1,3 +1,4 @@
+
 # trova spider-man
 query-> title:"Spider"
 3 9613    # Spider
@@ -30,17 +31,25 @@ query-> release_date:[2014 TO 2022] AND casts:Ada*
 
 #i film con un nome/cognome con ada o un director con almeno una s nel nome/cognome
 query-> casts:Ada* OR directors:S*
-1 373314 #Misconduct - tomato
-3 18939 #Little Otik - tomato
-2 473033 #Uncut Gems - imdb
+3 373314 #Misconduct - tomato
+2 18939 #Little Otik - tomato
+1 473033 #Uncut Gems - imdb
 
 #
 query-> content:"belive love"~2
-0 0 
+
 
 #
 query-> casts:"Adam sandler" AND NOT genres:"comedy"
 3 2355 #Reign Over Me - tomato
 1 473033 #Uncut Gems - imdb
 2 2355 #Reign Over Me - imdb
+
+#
+
+query-> title:Sp*^2 OR title:A*
+3 1555  #The Spanish Apartment
+3 2771 #American Splendor
+2 583733 #Spring, Again
+1 594718 #Sputnik
 
