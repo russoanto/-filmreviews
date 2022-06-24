@@ -16,12 +16,15 @@ query-> directors:"Tarantino" AND casts:"Jackson"
 #film di sorrentini oppure i titoli con the king nel titolo
 query-> directors:"Sorrentino" OR title:"The King"
 3 722778  #The Hand of God
+2 179144 #The Great Beauty
+1 420818 #The Lion King
+3 541660 #Loro
 
 #Con i nomi dei film che hanno The lost city
 query-> title:"The Lost City"
-2 650 #Boyz n the Hood - pomodoro
-3 300672 #Vincent N Roxxy - pomodoro
-5 389015 #I, Tonya - imdb
+3 752623 #The Lost City - pomodoro
+1 9700 #The Lost City - pomodoro
+1 314095 #The Lost City of Z - imdb
 
 #i film che vanno dall'anno 2014 al 2022 ed un cast che in cui un nome/cognome ha almeno ada
 query-> release_date:[2014 TO 2022] AND casts:Ada*
@@ -36,17 +39,12 @@ query-> casts:Ada* OR directors:S*
 1 473033 #Uncut Gems - imdb
 
 #
-query-> content:"belive love"~2
-
-
-#
 query-> casts:"Adam sandler" AND NOT genres:"comedy"
 3 2355 #Reign Over Me - tomato
 1 473033 #Uncut Gems - imdb
 2 2355 #Reign Over Me - imdb
 
 #
-
 query-> title:Sp*^2 OR title:A*
 3 1555  #The Spanish Apartment
 3 2771 #American Splendor
