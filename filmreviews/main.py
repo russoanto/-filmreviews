@@ -30,40 +30,51 @@ def plot(x,y):
 
 
 
-def niceprint(top_k):
+def niceprint(top_k, p="default"):
     #ogni elemento di topk è aggregatehit dove ho la lista delle hit e punteggio già ordinato
 
     #attualmente prendo solo u valori più lunghi per fare il marge, ma volevo farvelo vedere cosi mi dite se c'è altro da modificare
+    print()
+    try:
+        for agghit in top_k:
+            #devo mettere assieme
+            #e preparare una lista di risultati dove ho le info
+            #sono già ordinate quindi mi basta fare degli append
+            #trama più lubnga
+            #recensioni metto assieme
+            #durata 1 sola
+            #genres (soluzione bonus)
+            #attori e cast, regista(soluzione bonus)
+            
+            #score = agghit[1]
 
-    for agghit in top_k:
-        #devo mettere assieme
-        #e preparare una lista di risultati dove ho le info
-        #sono già ordinate quindi mi basta fare degli append
-        #trama più lubnga
-        #recensioni metto assieme
-        #durata 1 sola
-        #genres (soluzione bonus)
-        #attori e cast, regista(soluzione bonus)
-        
-        #score = agghit[1]
+            hitlist = []
+            #hitlist.clear()
+            for hitstr in agghit[0]:
+                hit = hitstr[0]
+                hitlist.append(hit)
+            
+            a = mergeSameHit(hitlist)
 
-        hitlist = []
-        #hitlist.clear()
-        for hitstr in agghit[0]:
-            hit = hitstr[0]
-            hitlist.append(hit)
-        
-        a = mergeSameHit(hitlist)
-        
-        param =["id", "title","genres", "content", "directors", "casts", "release_date", "runtime","reviews"]
-        answare = input('vuoi stampare le recensioni per ' + str(a[param[1]]) + '? (si = 1): ')
-        for i in param:
-            if i != "reviews":
-                print(i + ': ' + str(a[i]) + '\n')
-            elif answare == "1":
-                print(i + ': ' + replaceReviews(str(a[i])) + '\n')
+            if p == "default":
+                param =["id", "title","genres", "content", "directors", "casts", "release_date", "runtime","reviews"]
+                answare = input('vuoi stampare le recensioni per ' + str(a[param[1]]) + '? (si = 1): ')
+                for i in param:
+                    if i != "reviews":
+                        print(i + ': ' + str(a[i]) + '\n')
+                    elif answare == "1":
+                        print(i + ': ' + replaceReviews(str(a[i])) + '\n')
+            else:
+                if p == "reviews":
+                    print(replaceReviews(a[p]))
+                else:
+                    print(a[p])
+            print("----------------------------")
+    except:
+        print("Inserito pramentro sbagliato")
+    print()
 
-        print("----------------------------")
+
 
 
 def replaceReviews(s):
@@ -165,25 +176,26 @@ def create_parser(idx):
     return p
 
 
-def searchInIndex(query,searchPOM, searchIMD):
+def searchInIndex(query,searchPOM, searchIMD, k:int = 5):
     searchers = [(searchPOM,'tomato'), (searchIMD,'imdb')]
-    top_k = merge_search.aggregate_search(query, searchers, 5)
+    top_k = merge_search.aggregate_search(query, searchers, k)
     return top_k
 
 def evaluate(suite,pomodoro, imdb):
 
     res = []
+    topk = []
     for i in tqdm(range(len(suite.benchmarks))):
         bench = suite.benchmarks[i]
-        topk = run_query(bench.query,pomodoro,imdb,6)
+        topk.append(run_query(bench.query,pomodoro,imdb,6))
         # per ogni query salvo id dei documenti rilevanti con relativo score
         data = {s.id:s.relevance for s in bench.scores} 
         entries = []
-        for row in topk:
+        for row in topk[i]:
             relevance = next((d for hit, source in row.hits if (d := data.get(hit['id'])) is not None), 0)
             entries.append(relevance)
         res.append(BenchmarkResult(bench, entries))
-    return res
+    return res, topk
 
 
 def create_command_line(subparsers):
@@ -227,14 +239,23 @@ def main():
         #leggo il file di benchmark
         with args.file as fd:
             suite = parse_suite(fd)
-        res = evaluate(suite,pomodoro,imdb) #estraggo i per ogni query i documenti rilevanti
+        res,topk = evaluate(suite,pomodoro,imdb) #estraggo i per ogni query i documenti rilevanti e il suo ranking dei risultati uniti
         
         avg_precisions = []
         interp_precisions = [0] * 10
         
+        j = 0
         for el in res:
             print(el.results_point)
             print(f"{el.query.query} : {[x.relevance for x in el.query.scores]} {el.results_point}")
+            
+            schema = input("Inserire il tipo di ritorno si vuole visualizzare (default-invio- -> \"title\", altrimenti inserisci)")
+            #schema = ""
+            if schema == "":
+                niceprint(topk[j], "title")
+            else:
+                niceprint(topk[j], schema)
+            #---------------------------
 
             # DCG = r1 + r2/log_2(2) + r3/log_3(3) etc ...
             val = BenchmarkResult.compute_discounted_cumulative_gain(el.results_point)
@@ -278,6 +299,8 @@ def main():
             else:
                 print("Nessun risultato ottenuto")
             print("\n")
+            j += 1
+
 
         mean_avg = sum(avg_precisions)/len(res)
         print(f"Mean average precision: {mean_avg}")
@@ -290,7 +313,7 @@ def main():
         searchIMD = imdb.ix.searcher()
 
         p = create_parser(pomodoro)
-        query_txt = input('Inserire la query --> ')
+        query_txt = bytearray(input('Inserire la query --> ').encode()).decode('utf-8')
         query = re.sub(r"\s+[1I]$", "", query_txt.strip())
         try:
             query = p.parse(query_txt)
@@ -301,15 +324,22 @@ def main():
                 print("Query non valida")
             quit()
 
+               
+        k = input("inserire il limite di match (default - invio - 5, altrimenti il tuo numero):")
+        if k == "":
+            k = 5
+            resultPOM = searchPOM.search(query, terms=True, limit=k)
+            resultIMD = searchIMD.search(query, terms=True, limit=k)
 
-        resultPOM = searchPOM.search(query, terms=True, limit=10)
-        resultIMD = searchIMD.search(query, terms=True, limit=10)
+            print("POMODORO")
+            printInformation(resultPOM)
+            print("----------------------------")
+            print("IMDB")
+            printInformation(resultIMD)
+        
+            niceprint(searchInIndex(query, searchPOM, searchIMD))
+        else:
+            niceprint(searchInIndex(query, searchPOM, searchIMD, int(k)))
 
-        print("POMODORO")
-        printInformation(resultPOM)
-        print("----------------------------")
-        print("IMDB")
-        printInformation(resultIMD)
-        niceprint(searchInIndex(query, searchPOM, searchIMD))
 
 main()
