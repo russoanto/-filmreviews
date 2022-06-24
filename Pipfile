@@ -10,6 +10,9 @@ Whoosh = "*"
 tqdm = "*"
 readchar = "*"
 rotten-tomatoes-client = "*"
+numpy = "*"
+argparse = "*"
+matplotlib = "*"
 
 [dev-packages]
 
