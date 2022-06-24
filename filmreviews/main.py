@@ -217,11 +217,6 @@ def main():
         with args.file as fd:
             suite = parse_suite(fd)
         res,topk = evaluate(suite,pomodoro,imdb) #estraggo i per ogni query i documenti rilevanti
-<<<<<<< HEAD
-        #picca yasuo
-=======
-        #1commento 
->>>>>>> 16aa4b835fbe46b21d1b8386cece71907446552e
         avg_precisions = []
         interp_precisions = [0] * 10
         j = 0
