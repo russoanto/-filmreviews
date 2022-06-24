@@ -258,46 +258,50 @@ def main(pathBench):
         res = evaluate(suite,pomodoro,imdb)
         avg_precisions = []
         interp_precisions = [0] * 10
+        
         for el in res:
             print(f"{el.query.query} : {[x.relevance for x in el.query.scores]} {el.raw}")
 
 
             # DCG = r1 + r2/log_2(2) + r3/log_3(3) etc ...
             val = BenchmarkResult.compute_discounted_cumulative_gain(el.raw)
-            print(f"DCG: {val}")
+           
 
             # IDEAL DCG
             ideal_list = sorted([x.relevance for x in el.query.scores], reverse=True)
             val_ideal = BenchmarkResult.compute_discounted_cumulative_gain(ideal_list)
+            if val_ideal != 0:
+                print(f"DCG: {val}")
+                print(f"IDEAL DCG: {val_ideal}")
+                print(f"NDCG: {val/val_ideal}")
 
-            print(f"IDEAL DCG: {val_ideal}")
-            print(f"NDCG: {val/val_ideal}")
+                # NATURAL PRECISION
+                natural_pr = []
+                tot_rel = sum([x.relevance >= RELEVANCE_THRESHOLD for x in el.query.scores])
+                for i, entry in enumerate(el.raw):
+                    if entry >= RELEVANCE_THRESHOLD:
+                        precision = (len(natural_pr) + 1)/(i + 1)
+                        natural_pr.append(precision)
+                print("Natural precision: ")
+                print(" | ".join([f"{(i + 1) / tot_rel}:{value}" for i, value in enumerate(natural_pr)]))
 
-            # NATURAL PRECISION
-            natural_pr = []
-            tot_rel = sum([x.relevance >= RELEVANCE_THRESHOLD for x in el.query.scores])
-            for i, entry in enumerate(el.raw):
-                if entry >= RELEVANCE_THRESHOLD:
-                    precision = (len(natural_pr) + 1)/(i + 1)
-                    natural_pr.append(precision)
-            print("Natural precision: ")
-            print(" | ".join([f"{(i + 1) / tot_rel}:{value}" for i, value in enumerate(natural_pr)]))
+                # STANDARD PRECISION
+                precisions = [0.0] * 10
+                for i in range(10):
+                    maxval = max([value for j, value in enumerate(natural_pr) if (j + 1) / tot_rel >= (i + 1) / 10], default=0)
+                    precisions[i] = maxval
+                    interp_precisions[i] += maxval
+                print("Standard precision: ")
+                print(" | ".join([f"{(i+1)/10}:{value}" for i, value in enumerate(precisions)]))
 
-            # STANDARD PRECISION
-            precisions = [0.0] * 10
-            for i in range(10):
-                maxval = max([value for j, value in enumerate(natural_pr) if (j + 1) / tot_rel >= (i + 1) / 10], default=0)
-                precisions[i] = maxval
-                interp_precisions[i] += maxval
-            print("Standard precision: ")
-            print(" | ".join([f"{(i+1)/10}:{value}" for i, value in enumerate(precisions)]))
+                avg_prc = sum(natural_pr) / tot_rel
+                print(f"Average non-interpolated precision: {avg_prc}")
 
-            avg_prc = sum(natural_pr) / tot_rel
-            print(f"Average non-interpolated precision: {avg_prc}")
-
-            avg_int_prc = sum(precisions) / 10
-            avg_precisions.append(avg_int_prc)
-            print(f"Average interpolated precision: {avg_int_prc}")
+                avg_int_prc = sum(precisions) / 10
+                avg_precisions.append(avg_int_prc)
+                print(f"Average interpolated precision: {avg_int_prc}")
+            else:
+                print("Nessun risultato ottenuto")
             print("\n")
 
         mean_avg = sum(avg_precisions)/len(res)
