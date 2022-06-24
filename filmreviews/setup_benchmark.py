@@ -15,16 +15,22 @@ class RelevantDocument:
 class Benchmark:
     query: str
     scores: list[RelevantDocument]
+    
+    def __len__(self):
+        return len(self.scores)
 
 
 @dataclass
 class BenckmarkList:
     benchmarks: list[Benchmark]
 
+    def __len__(self):
+        return len(self.benchmarks)
+
 @dataclass
 class BenchmarkResult:
     query: Benchmark
-    raw: list[int]
+    results_point: list[int]
     @staticmethod
     def compute_discounted_cumulative_gain(data):
         if len(data) == 0:
