@@ -1,0 +1,134 @@
+# Game Compendium
+Filmreviews
+#### Table of Contents
+- [Summary](#summary)
+- [Installazione](#Installazione)
+  - [Dipendenze](#dipendenze)
+  
+
+
+## Summary
+Questo progetto si occupa di indicizzare i film presenti (solo una parte per ragioni di tempo e spazio) su [Rottentomatoes](https://www.rottentomatoes.com/) e su [IMDB](https://www.imdb.com/). Il progetto ha gia i 2 indici pronti, è possibile eseguire una nuova indicizzazione ma bisogna considerare che richiede più di 1 ora di tempo.
+
+## Installazione
+Per l'installazione si consiglia l'uso di python 3.9.2 e superiori. Per comodità abbiamo scelto l'uso di pipenv in modo da facilitare l'installazione delle dipendenze.
+
+### Dependencies
+
+Come detto in precedenza questo progetto fa uso di pipenv, quindi una volta installato pipenv eseguire
+```bash
+$ cd filmreviews/
+$ pipenv install -r requirements.txt
+```
+In questo modo abbiamo un ambiente virtuale con tutte le dipendenze del progetto
+
+### Running
+
+```bash
+$ python filmreviews/main.py --help
+```
+
+1.	indexing: permette di avviare la fase di web scraping e indicizzazione delle 2 fonti, richiede molto tempo (+ 1h), il progetto ha già di default ha già i due indici. Attenzione: Una volta che l'indicizzazione verrà avviata, se interrotta i progressi fino a quel punto non saranno salvati e l'operazione di indicizzazione dovrà essere riavviata.
+
+```bash
+$ python filmreviews/main.py  indexing
+```
+
+2. benchmark: peremtte di calcolare i vari parametri di benchmark rispetto a 10 query di testing, bisogna passare il file contenente le query con i rispettivi "documenti rilevanti"
+```bash
+$ python filmreviews/main.py benchmark  filmreviews/query_benchmark
+```
+3. di default se non siinseriscono parametri sarà possibile effettuare una ricerca mediant
+
+
+### Evaluation
+Automatic evaluation is also supported! (whohoo!).
+To use it run
+```bash
+$ python3 gamecompendium/main.py evaluate main.benchmark
+```
+It will run our [main benchmark](main.benchmark) and print results to console
+once it's done.
+
+The code computes: Discounted Cumulative Gain (raw and normalized),
+precision (natural and standard), average precision (raw and interpolated) and
+mean average precision.
+
+## Query Language
+We used the default
+[whoosh query language](https://whoosh.readthedocs.io/en/latest/querylang.html)
+with some [bug fixes](https://github.com/mchaput/whoosh/pull/23) and minor
+improvements to have a better seamless experience.
+
+By default, every term will be searched in both name, summary and story line,
+giving more weight to the name, also the OR conjunction is used by default:
+"portal 2" will search portal OR 2 in every name, summary and storyline.
+This gives us more results but since score is added the search experience should
+be the same, just more resilient.
+If you don't want to use this default behaviours you can type it manually:
+`name:portal AND name:2` or `name:(portal AND 2)`.
+
+For better integration with lazy-typed queries we also give a boost to
+specified fields.
+In the query `portal date:2011` the `date:` part of the query will have
+more weight than the unspecified part.
+Same with `Gran Theft Auto name:(San Andreas)`, the manually-specified name
+will take more weight in the query scoring.
+
+If you want to add more weight to a part of the query you can do so with the
+caret operator: `name:grand name:theft^2` ("theft" will have twice the weight
+of "grand")
+
+You can also use phrase queries (`"grand theft auto"`), positional phrase queries
+(`"grand auto"~2` where "grand" is at max 2 word distant from "auto"), range
+queries `"grand theft auto" AND date:[2005 to 2010]"`. For more examples [check out
+our benchmark](main.benchmark)
+
+
+
+
+## Adding sources
+Steam and IGDB don't have all the games you need? That's what we think too!
+Luckily it's really easy to add additional sources to game compendium!
+
+Write your own implementation that satisfies `source.py`
+[protocol](https://www.python.org/dev/peps/pep-0544/)
+then add an instance of it in `app.py`'s `DEFAULT_SOURCES`, it's that easy!
+Our algorithms are thought with extensibility in mind and they will
+work with 2, 3 or 10 information sources!
+
+## Technical Info
+There ae multiple considerable technical barriers we had to overcome,
+we'll discuss them here shortly, check out the source code for
+more details.
+
+### Query Aggregation
+#### [go to file](gamecompendium/aggregator.py)
+
+We use a slightly different version of the **Top-k
+Threshold algorithm** (Fagin et al. 2001*) (random access version).
+Since games aren't always in all the sources, we need to change the
+score aggregation function.
+Instead of summing results from different sources we **average** the scores.
+So if instance x is found in source A, B, C `Sx = (Sxa + Sxb + Sxc) / 3`,
+while if instance y is found only in B and C `Sy = (Syb + Syc) / 2`.
+This means that entities do not gain anything from being in multiple sources.
+To make this work efficiently the threshold computation should also be different,
+we can prove mathematically that `threshold = max(cdim1.score, ..., cdiml.score)`,
+is the minimum threshold function for this case, and this is the formula
+that we're using right now ([**mathematical proof** in the source code](
+gamecompendium/aggregator.py)).
+
+### Entity Resolution
+#### [go to file](gamecompendium/resolver.py)
+
+Games don't have a "hard" definition as games are only what we (as humans) think
+of them. **We found this "definition" of game similar to the goal of Information
+Retrieval**, we then use the system itself to help us discriminate entities.
+
+The idea is this: for the first source indexed, every game will have its own
+entity, from the second source the IR system would search each game in the already
+indexed sources (with various heuristics), and if an entity is found, it will
+be reused, otherwise another entity will be generated.
+We call this **Recursive Entity Resolution**.
+
