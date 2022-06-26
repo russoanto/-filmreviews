@@ -14,6 +14,10 @@ Questo progetto si occupa di indicizzare i film presenti (solo una parte per rag
 Per l'installazione si consiglia l'uso di python 3.9.2 e superiori. Per comodità abbiamo scelto l'uso di pipenv in modo da facilitare l'installazione delle dipendenze.
 
 ### Dependencies
+### -------------------------------------------------
+```
+Linux/unix based
+```
 
 Come detto in precedenza questo progetto fa uso di pipenv, quindi una volta installato pipenv eseguire
 ```bash
@@ -29,6 +33,21 @@ Se si vuole eseguire un installazione automatizzata si può lanciare il seguente
 ```bash
 $ bash installUpdate.sh
 ```
+
+### -------------------------------------------------
+
+```
+Windows based
+```
+
+Bisogna aver installato python - pip sul proprio computer, non si potrà utilizzare gli script per l'installazione, ma si dovrà fare necessariamente a mano.
+
+```power shell
+$ cd ./filmrewies/
+$ python.exe -m pip install -r requirements.txt
+$ cd ./filmrewies/
+```
+Non sarà presente un ambiente virtuale con questa serie di comandi.
 
 ### Running
 
