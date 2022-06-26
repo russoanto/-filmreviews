@@ -4,6 +4,8 @@ Filmreviews
 - [Summary](#summary)
 - [Installazione](#Installazione)
   - [Dipendenze](#dipendenze)
+    -[Linux/Unix] (#linux/unix)
+    -[Windows] (#windows)
   
 
 
@@ -13,11 +15,10 @@ Questo progetto si occupa di indicizzare i film presenti (solo una parte per rag
 ## Installazione
 Per l'installazione si consiglia l'uso di python 3.9.2 e superiori. Per comodità abbiamo scelto l'uso di pipenv in modo da facilitare l'installazione delle dipendenze.
 
-### Dependencies
+### Dipendenze
 ### -------------------------------------------------
-```
-Linux/unix based
-```
+#### Linux/Unix
+
 
 Come detto in precedenza questo progetto fa uso di pipenv, quindi una volta installato pipenv eseguire
 ```bash
@@ -36,9 +37,7 @@ $ bash installUpdate.sh
 
 ### -------------------------------------------------
 
-```
-Windows based
-```
+#### Windows
 
 Bisogna aver installato python - pip sul proprio computer, non si potrà utilizzare gli script per l'installazione, ma si dovrà fare necessariamente a mano.
 
@@ -50,6 +49,8 @@ $ cd ./filmrewies/
 Non sarà presente un ambiente virtuale con questa serie di comandi.
 
 ### Running
+
+Attenzione !!! bisogna essere nella directory filmreviews/filmreviews per lanciare i comandi.
 
 ```bash
 $ python main.py --help
