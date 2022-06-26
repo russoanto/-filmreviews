@@ -1,11 +1,13 @@
 import tomatoes,movie_search,imdbClass,merge_search
 from whoosh.qparser import syntax, Plugin, QueryParser, MultifieldPlugin
 import re
+import os
 from whoosh.index import open_dir
 from tqdm import tqdm
 from setup_benchmark import parse_suite
 from setup_benchmark import BenckmarkList,BenchmarkResult,RelevantDocument
 import argparse
+import shutil
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -220,18 +222,36 @@ def main():
     # searcher.getAllPageMovie()
     data = searcher.readIndex()  #creazione indice di base
 
-    pomodoro = tomatoes.indexTomatoes(data)
+    # pomodoro = tomatoes.indexTomatoes(data)
 
-    imdb = imdbClass.imdbIndex("./movies/index.json", data, "https://www.imdb.com")
+    # imdb = imdbClass.imdbIndex("./movies/index.json", data, "https://www.imdb.com")
 
+    def delete_index(path):
+        if os.path.exists(path):
+            shutil.rmtree(path)
+    def create_source():
+        pomodoro = tomatoes.indexTomatoes(data)
+        imdb = imdbClass.imdbIndex("./movies/index.json", data, "https://www.imdb.com")        
+        return pomodoro,imdb
+
+    pomodoro,imdb = create_source()
 
     if args.action == 'indexing':
         answare = input('Quale fonte si vuole indicizzare? (default all, 1 = tomato, 2 = imdb)')
         if answare == '1':
+            delete_index('./indexdir')
+            pomodoro,imdb = create_source()
             getInformation_indexing(pomodoro)
         elif answare == '2':
+            delete_index('./indexdirIMDB')
+            pomodoro,imdb = create_source()
             getInformation_indexing(imdb)
         else:
+            delete_index('./indexdir')
+            delete_index('./indexdirIMDB')
+
+            pomodoro,imdb = create_source()
+
             getInformation_indexing(pomodoro)
             getInformation_indexing(imdb)
          
