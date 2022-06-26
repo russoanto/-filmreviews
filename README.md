@@ -4,8 +4,8 @@ Filmreviews
 - [Summary](#summary)
 - [Installazione](#Installazione)
   - [Dipendenze](#dipendenze)
-    - [Linux/Unix] (#linux/unix)
-    - [Windows] (#windows)
+    - [Linux/Unix](#Linux/Unix)
+    - [Windows](#windows)
   
 
 
