@@ -141,7 +141,8 @@ def printInformation(result):
     if result.has_matched_terms():
         scores = []
         for x in result:
-            print(x["title"] + ' --> ' + x["id"] + '   ' + str(x.score)+ '\n')
+            print('title: ' + x["title"] + '\n id: ' + x["id"] + '\n score: ' + str(x.score)+ '\n')
+            print("--------------------------------------------")
             scores.append(x.score)
 
 def run_query(query_txt, pomodoro,imdb, k: int = 5):
