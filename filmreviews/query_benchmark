@@ -60,21 +60,21 @@ query-> title:Sp*^2 OR title:A*
 1 594718 #Sputnik
 
 #richiesta specifica
-#UIN: 
+#UIN: richiesta complessa
 query-> (content:b*l? AND casts:[Adam TO Benj]) AND directors:Be*^0.5
 3 109417 #Battle of the Year
 2 60308 #Moneyball
 1 17483 #Shelter
 
 #richiesta specifica
-#UIN: 
+#UIN: richista complessa
 query-> (((content:"italy" AND content:"from"))AND (genres:"Drama" OR genres:"Thriller")) AND directors:Z*i?) AND (NOT casts:A* AND casts:?A*)
 2 87502 #Flight
 3 728118 #Quo Vadis, Aida?
 3 84175 #Beasts of the Southern Wild
 
 #query semplice ma comunque dispendiosa di tempo durante il merge dei dati
-#UIN:film che non contengono attori che hanno la A nel nome
+#UIN: film che non contengono attori che hanno la A nel nome
 query-> NOT casts:*A*
 1 75174 #The Grey
 3 337401 #Mulan
