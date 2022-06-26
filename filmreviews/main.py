@@ -223,10 +223,6 @@ def main():
     # searcher.getAllPageMovie()
     data = searcher.readIndex()  #creazione indice di base
 
-    # pomodoro = tomatoes.indexTomatoes(data)
-
-    # imdb = imdbClass.imdbIndex("./movies/index.json", data, "https://www.imdb.com")
-
     def delete_index(path):
         if os.path.exists(path):
             shutil.rmtree(path)
