@@ -333,7 +333,14 @@ def main():
         print("AVERAGE STANDARD PRECISION: ")
         values = [value/len(interp_precisions) for key, value in enumerate(interp_precisions)]
         print("\n".join([f"lv. {(key + 1) / 10} value {value / len(interp_precisions)}" for key, value in enumerate(interp_precisions)]))
-        plot(np.arange(0,1.0,0.1), values)
+        ri = input("Inserire s per visualizzare il grafico (altrimenti qualsiasi altra stringa per andare oltre): ")
+        if ri == "s":
+            try:
+                plot(np.arange(0,1.0,0.1), values)
+            except:
+                print("pacchetto python3-tk mancante, serve per la stampa del grafico")
+        else:
+            print("Il grafico non verrà stampato, Grazie e arrivederci")
 
     else:
         searchPOM = pomodoro.ix.searcher()
