@@ -23,7 +23,7 @@ def plot(x,y):
     plt.ylabel('y - axis')
     
     # giving a title to my graph
-    plt.title('My first graph!')
+    plt.title('Average Precision (Standard Level)')
     
     # function to show the plot
     plt.show()
@@ -246,16 +246,15 @@ def main():
         
         j = 0
         for el in res:
-            print(el.results_point)
             print(f"{el.query.query} : {[x.relevance for x in el.query.scores]} {el.results_point}")
             
-            schema = input("Inserire il tipo di ritorno si vuole visualizzare (default-invio- -> \"title\", altrimenti inserisci)")
-            #schema = ""
-            if schema == "":
-                niceprint(topk[j], "title")
-            else:
-                niceprint(topk[j], schema)
-            #---------------------------
+            # schema = input("Inserire il tipo di ritorno si vuole visualizzare (default-invio- -> \"title\", altrimenti inserisci)")
+            # #schema = ""
+            # if schema == "":
+            #     niceprint(topk[j], "title")
+            # else:
+            #     niceprint(topk[j], schema)
+            # #---------------------------
 
             # DCG = r1 + r2/log_2(2) + r3/log_3(3) etc ...
             val = BenchmarkResult.compute_discounted_cumulative_gain(el.results_point)
@@ -265,49 +264,56 @@ def main():
             ideal_list = sorted([x.relevance for x in el.query.scores], reverse=True)
             val_ideal = BenchmarkResult.compute_discounted_cumulative_gain(ideal_list)
             if val_ideal != 0:
-                # print(f"DCG: {val}")
-                # print(f"IDEAL DCG: {val_ideal}")
-                # print(f"NDCG: {val/val_ideal}")
+                print(f"DCG: {val}")
+                print(f"IDEAL DCG: {val_ideal}")
+                print(f"NDCG: {val/val_ideal}")
 
                 # NATURAL PRECISION
 
-                natural_pr = []
+                natural_precision = []
                 tot_rel = sum([x.relevance >= RELEVANCE_THRESHOLD for x in el.query.scores])
                 for i, entry in enumerate(el.results_point):
                     if entry >= RELEVANCE_THRESHOLD:
-                        precision = (len(natural_pr) + 1)/(i + 1)
-                        natural_pr.append(precision)
-
-                print("Natural precision: ")
-                print(" | ".join([f"{(i + 1) / tot_rel}:{value}" for i, value in enumerate(natural_pr)]))
+                        precision = (len(natural_precision) + 1)/(i + 1)
+                        natural_precision.append(precision)
+                print('====================================================')
+                print("PRECISIONE A LIVELLI NATURALI: ")
+                print("\n".join([f"lv. {(i + 1) / tot_rel} value {value}" for i, value in enumerate(natural_precision)]))
 
                 # STANDARD PRECISION
                 precisions = [0.0] * 10
                 for i in range(10):
-                    maxval = max([value for j, value in enumerate(natural_pr) if (j + 1) / tot_rel >= (i + 1) / 10], default=0)
+                    maxval = max([value for j, value in enumerate(natural_precision) if (j + 1) / tot_rel >= (i + 1) / 10], default=0)
                     precisions[i] = maxval
                     interp_precisions[i] += maxval
-                print("Standard precision: ")
-                print(" | ".join([f"{(i+1)/10}:{value}" for i, value in enumerate(precisions)]))
+                print('====================================================')
+                print("PRECISIONE A LIVELLI STANDARD: ")
+                print("\n".join([f"lv. {(i+1)/10} value {value}" for i, value in enumerate(precisions)]))
                 #values = [value for i,value in enumerate(precisions)]
-                avg_prc = sum(natural_pr) / tot_rel
-                print(f"Average non-interpolated precision: {avg_prc}")
+                avg_prc = sum(natural_precision) / tot_rel
+                print('====================================================')
+
+                print(f"PRECISIONE MEDIA (NON INTERPOLATA): {avg_prc}")
 
                 avg_int_prc = sum(precisions) / 10
                 avg_precisions.append(avg_int_prc)
-                print(f"Average interpolated precision: {avg_int_prc}")
+                print('====================================================')
+
+                print(f"PRECISIONE MEDIA (INTERPOLATA): {avg_int_prc}")
             else:
                 print("Nessun risultato ottenuto")
             print("\n")
             j += 1
 
-
+        print('====================================================')
         mean_avg = sum(avg_precisions)/len(res)
-        print(f"Mean average precision: {mean_avg}")
-        print("Average Standard precision: ")
+        print(f"MEAN AVERAGE PRECISION: {mean_avg}")
+        print('====================================================')
+        print("AVERAGE STANDARD PRECISION: ")
         values = [value/len(interp_precisions) for key, value in enumerate(interp_precisions)]
+        print("\n".join([f"lv. {(key + 1) / 10} value {value / len(interp_precisions)}" for key, value in enumerate(interp_precisions)]))
         plot(np.arange(0,1.0,0.1), values)
-        print(" | ".join([f"{(key + 1) / 10}:{value / len(interp_precisions)}" for key, value in enumerate(interp_precisions)]))
+
     else:
         searchPOM = pomodoro.ix.searcher()
         searchIMD = imdb.ix.searcher()
