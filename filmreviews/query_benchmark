@@ -26,30 +26,30 @@ query-> directors:"Sorrentino" OR title:"The King"
 #richiesta specifica
 #UIN: Trovami il film The Lost City
 query-> title:"The Lost City"
-3 752623 #The Lost City - pomodoro
-1 9700 #The Lost City - pomodoro
-1 314095 #The Lost City of Z - imdb
+3 752623 #The Lost City
+1 9700 #The Lost City
+1 314095 #The Lost City of Z
 
 #richiesta booleana "and" e range di anni ed una regular expression (richesta non precisa)
 #UIN: Quali sono i film rilasciati tra il 2014 e il 2022 con attori che iniziano con ada?
 query-> release_date:[2014 TO 2022] AND casts:Ada*
-1 791570 #Suicide Forest Village - imdb
-3 402897 #The Death of Stalin - pomodoro
-2 638534 #The White Tiger - imdb
+1 791570 #Suicide Forest Village 
+3 402897 #The Death of Stalin
+2 638534 #The White Tiger
 
 #richiesta booleana "or" e doppia regex
 #UIN: Quali film hanno attori che iniziano con Ada o registi che iniziano con la s?
 query-> casts:Ada* OR directors:S*
-3 373314 #Misconduct - tomato
-2 18939 #Little Otik - tomato
-1 473033 #Uncut Gems - imdb
+3 373314 #Misconduct 
+2 18939 #Little Otik 
+1 473033 #Uncut Gems
 
 #richiesta booleana "and" e "not"
 #UIN: Film di Adam Sendler non comico
 query-> casts:"Adam sandler" AND NOT genres:"comedy"
-3 2355 #Reign Over Me - tomato
-1 473033 #Uncut Gems - imdb
-2 2355 #Reign Over Me - imdb
+3 2355 #Reign Over Me 
+1 473033 #Uncut Gems
+2 2355 #Reign Over Me 
 
 #richiesta con regex
 #UIN: Sono molto interessato ai film che iniziano con Sp ma vanno anche bene i film che iniziano per A
