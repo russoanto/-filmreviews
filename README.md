@@ -5,8 +5,10 @@ Filmreviews
 - [Installazione](#Installazione)
   - [Dipendenze](#dipendenze)
     - [Linux/Unix](#Linux/Unix)
-    - [Windows](#windows)
-  
+      - [Python3.9.>=2](#Python3.9.>=2)
+      - [Python3.10.*](#Python3.10.*)
+    - [Windows](#Windows)
+  - [Running](#Running)
 
 
 ## Summary
@@ -19,7 +21,7 @@ Per l'installazione si consiglia l'uso di python 3.9.2 e superiori. Per comodit�
 ### -------------------------------------------------
 #### Linux/Unix
 
-## - Python 3.9.>2
+##### Python3.9.>=2
 
 Se si possiede una versione 3.9.\[>=2\] si può utilizzare il comando in aggiunta
 
@@ -37,8 +39,7 @@ $ pipenv --three
 $ bash installUpdate.sh
 ```
 
-
-## - Python 3.10.*
+##### Python3.10.*
 
 Come detto in precedenza questo progetto fa uso di pipenv, quindi una volta installato pipenv eseguire
 
@@ -71,7 +72,7 @@ $ cd ./filmrewies/
 ```
 Non sarà presente un ambiente virtuale con questa serie di comandi.
 
-### Running
+## Running
 
 Attenzione !!! bisogna essere nella directory filmreviews/filmreviews per lanciare i comandi.
 
