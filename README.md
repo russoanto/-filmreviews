@@ -21,12 +21,17 @@ Per l'installazione si consiglia l'uso di python 3.9.2 e superiori. Per comodit�
 ### -------------------------------------------------
 #### Linux/Unix
 
+Entra nella suddetta cartella con:
+
+```bash
+$ cd $YOUR_PATH/filmreviews/
+```
+
 ##### Python3.9.>=2
 
 Se si possiede una versione 3.9.\[>=2\] si può utilizzare il comando in aggiunta
 
 ```bash
-$ cd filmreviews/
 $ pipenv --three
 $ pipenv install -r requirements.txt
 $ cd filmreviews/
@@ -63,10 +68,15 @@ $ bash installUpdate.sh
 
 #### Windows
 
+Entra nella suddetta cartella con:
+
+```powershell
+$ cd $YOUR_PATH/filmreviews/
+```
+
 Bisogna aver installato python - pip sul proprio computer, non si potrà utilizzare gli script per l'installazione, ma si dovrà fare necessariamente a mano.
 
-```power shell
-$ cd ./filmrewies/
+```powershell
 $ python.exe -m pip install -r requirements.txt
 $ cd ./filmrewies/
 ```
