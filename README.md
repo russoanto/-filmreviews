@@ -5,8 +5,8 @@ Filmreviews
 - [Installazione](#Installazione)
   - [Dipendenze](#dipendenze)
     - [Linux/Unix](#Linux/Unix)
-      - [Python3.9.>=2](#Python3.9.>=2)
-      - [Python3.10.*](#Python3.10.*)
+      - [Python3.9](#Python3.9)
+      - [Python3.10](#Python3.10)
     - [Windows](#Windows)
   - [Running](#Running)
 
@@ -27,29 +27,30 @@ Entra nella suddetta cartella con:
 $ cd $YOUR_PATH/filmreviews/
 ```
 
-##### Python3.9.>=2
+##### Python3.9
 
-Se si possiede una versione 3.9.\[>=2\] si può utilizzare il comando in aggiunta
+Se si possiede una versione 3.9.2 o superiori, si può utilizzare il comando
 
 ```bash
-$ pipenv --three
+$ pipenv install --three
 $ pipenv install -r requirements.txt
 $ cd filmreviews/
 ```
 
-Se si vuole eseguire un installazione automatizzata si può lanciare il seguente comando da una console bash
+*Se si vuole eseguire un installazione automatizzata si può lanciare il seguente comando da una console bash*
 
 ```bash
-$ pipenv --three
+$ pipenv install --three
 $ bash installUpdate.sh
 ```
 
-##### Python3.10.*
+Se non dovesse funzionare bisogna cambiare il Pipfile ed cambiare la versione del python, con la versione utilizzata.
+
+##### Python3.10
 
 Come detto in precedenza questo progetto fa uso di pipenv, quindi una volta installato pipenv eseguire
 
 ```bash
-$ cd filmreviews/
 $ pipenv install -r requirements.txt
 $ cd filmreviews/
 ```
