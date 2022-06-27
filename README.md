@@ -19,15 +19,38 @@ Per l'installazione si consiglia l'uso di python 3.9.2 e superiori. Per comodit�
 ### -------------------------------------------------
 #### Linux/Unix
 
+## - Python 3.9.>2
+
+Se si possiede una versione 3.9.\[>=2\] si può utilizzare il comando in aggiunta
+
+```bash
+$ cd filmreviews/
+$ pipenv --three
+$ pipenv install -r requirements.txt
+$ cd filmreviews/
+```
+
+Se si vuole eseguire un installazione automatizzata si può lanciare il seguente comando da una console bash
+
+```bash
+$ pipenv --three
+$ bash installUpdate.sh
+```
+
+
+## - Python 3.10.*
 
 Come detto in precedenza questo progetto fa uso di pipenv, quindi una volta installato pipenv eseguire
+
 ```bash
 $ cd filmreviews/
 $ pipenv install -r requirements.txt
 $ cd filmreviews/
 ```
+
 In questo modo abbiamo un ambiente virtuale con tutte le dipendenze del progetto.
 Se ci sono problemi durante la crazione del virtual environment a causa della versione di python è possibile cambiarla manualmente modificando il file Pipenv. Come specificato in precedenza la versione minima su cui è stato testato è su python 3.9 
+
 
 Se si vuole eseguire un installazione automatizzata si può lanciare il seguente comando da una console bash
 
