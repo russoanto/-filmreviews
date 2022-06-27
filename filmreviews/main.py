@@ -17,6 +17,10 @@ RELEVANCE_THRESHOLD = 2
 
 
 def plot(x,y):
+    '''
+    Quasta funzione definisce e stampa il grafico delle query analizzate
+    Riceve in ingresso due numeri float
+    '''
     plt.plot(x, y)
     
     # naming the x axis
@@ -33,25 +37,22 @@ def plot(x,y):
 
 
 def niceprint(top_k, p="default"):
-    #ogni elemento di topk è aggregatehit dove ho la lista delle hit e punteggio già ordinato
-
-    #attualmente prendo solo u valori più lunghi per fare il marge, ma volevo farvelo vedere cosi mi dite se c'è altro da modificare
+    '''
+    Questa funzione stampa il contenuto dei risultati della query, e fa il merge delle due soluzioni
+    #trama più lubnga
+    #recensioni metto assieme
+    #durata 1 sola
+    #genere (soluzione bonus)
+    #attori e cast, regista(soluzione bonus)
+    prende in input top_k, il contenuto con rank più alto, ed una p il nome del contenuto da stampare, se è default li stampa tutti
+    '''
+    
     print()
     try:
         for agghit in top_k:
-            #devo mettere assieme
-            #e preparare una lista di risultati dove ho le info
-            #sono già ordinate quindi mi basta fare degli append
-            #trama più lubnga
-            #recensioni metto assieme
-            #durata 1 sola
-            #genres (soluzione bonus)
-            #attori e cast, regista(soluzione bonus)
-            
-            #score = agghit[1]
 
             hitlist = []
-            #hitlist.clear()
+
             for hitstr in agghit[0]:
                 hit = hitstr[0]
                 hitlist.append(hit)
@@ -80,6 +81,10 @@ def niceprint(top_k, p="default"):
 
 
 def replaceReviews(s):
+    '''
+    visualizza correttamente il contenuto delle reviews e lo ritorna 
+    prende in input una stringa
+    '''
     s = str(s)
     s = s.replace("\\'", "'").replace("\\n", '\n')
     s = s.replace("[['", "\'").replace("[[\"", "\"").replace("\"]]", "\"").replace("']]", "\'")
@@ -90,6 +95,10 @@ def replaceReviews(s):
 
 def mergeSameHit(hitlist):
     
+    '''
+    prende in input una lista di 
+    '''
+
     if(len(hitlist)==1):
         return hitlist[0]
     
@@ -129,8 +138,9 @@ def mergeSameHit(hitlist):
 def getInformation_indexing(get):
     '''
     Fa scraping e indexing delle due fonti, imdb e pomodoro (get riceve uno dei due alla volta).
+    la funzione richiede parecchio tempo per il suo completamento
     '''
-    print("entro, ", type(get))
+    
     get.get_all_information_t()
     get.indexing()
 
@@ -145,47 +155,59 @@ def printInformation(result):
             print("--------------------------------------------")
             scores.append(x.score)
 
-def run_query(query_txt, pomodoro,imdb, k: int = 5):
-    # Remove "1" from the end of queries, this helps since games are
-    # always stored as "Portal" not "Portal 1"
-
+def run_query(query_txt, pomodoro,imdb, k: int = 5, searchSingle = False):
+    '''
+    Questa funzione, esegue la query in ingresso, e ritorna il topk ovvero la lista dei risultati della query con il merge.
+    prende in ingresso l'indice di tomatoes, imdb, un valore numerico, la stringa con la query, ed un boolean per la richiesta della stampa del singolo indice (prima tomatoes e poi imdb)
+    '''
     searchPOM = pomodoro.ix.searcher()
     searchIMD = imdb.ix.searcher()
-
     query_txt = re.sub(r"\s+[1I]$", "", query_txt.strip())
     p = create_parser(pomodoro)
     query = p.parse(query_txt)
+
+    if searchSingle:
+        #ricerco sui singoli indici e li stampo
+        resultPOM = searchPOM.search(query, terms=True, limit=k)
+        resultIMD = searchIMD.search(query, terms=True, limit=k)
+
+        print("POMODORO")
+        printInformation(resultPOM)
+        print("IMDB")
+        printInformation(resultIMD)
+
     searchers = [(searchPOM,'tomato'), (searchIMD,'imdb')]
     topk_results = merge_search.aggregate_search(query, searchers, k)
-
     return topk_results
 
 def create_parser(idx):
+
+    '''
+    Creo il parse della query
+    '''
     p = QueryParser(None, idx.ix.schema, group=syntax.OrGroup)
     fieldboosts = {
             'title': 6,
             'content':2,
     }
-
-    #Returns a QueryParser configured to search in multiple fields. (documentazione whoosh)
-    #Instead of assigning unfielded clauses to a default field, this parser transforms them 
-    # into an OR clause that searches a list of fields. For example, if the list of multi-fields is 
-    # “f1”, “f2” and the query string is “hello there”, the class will parse “(f1:hello OR f2:hello) 
-    # (f1:there OR f2:there)”. This is very useful when you have two textual fields (e.g. “title” and “content”) 
-    # you want to search by default
+    '''
+    Returns a QueryParser configured to search in multiple fields. (documentazione whoosh)
+    Instead of assigning unfielded clauses to a default field, this parser transforms them 
+    into an OR clause that searches a list of fields. For example, if the list of multi-fields is 
+    “f1”, “f2” and the query string is “hello there”, the class will parse “(f1:hello OR f2:hello) 
+    (f1:there OR f2:there)”. This is very useful when you have two textual fields (e.g. “title” and “content”) 
+    you want to search by default
+    '''
     mfp = MultifieldPlugin(('title', 'content', 'casts','directors'), fieldboosts=fieldboosts)
     p.add_plugin(mfp)
 
     return p
 
-
-def searchInIndex(query,searchPOM, searchIMD, k:int = 5):
-    searchers = [(searchPOM,'tomato'), (searchIMD,'imdb')]
-    top_k = merge_search.aggregate_search(query, searchers, k)
-    return top_k
-
 def evaluate(suite,pomodoro, imdb):
-
+    '''
+    la valutazione dei benchmark, sulle proposte fatte sul file, query_benchmark, confronta con i suoi risultati ed inserisce 0 se non trova la corrispondenza
+    altrimenti inserisce il numero proposto
+    '''
     res = []
     topk = []
     for i in tqdm(range(len(suite.benchmarks))):
@@ -198,10 +220,14 @@ def evaluate(suite,pomodoro, imdb):
             relevance = next((d for hit, source in row.hits if (d := data.get(hit['id'])) is not None), 0)
             entries.append(relevance)
         res.append(BenchmarkResult(bench, entries))
+
     return res, topk
 
 
 def create_command_line(subparsers):
+    '''
+    Selezione dei comandi da svolgere
+    '''
     indexing = subparsers.add_parser('indexing', help='Make web scarping and create whoosh index')
     indexing.set_defaults(action='indexing')
 
@@ -253,25 +279,20 @@ def main():
             getInformation_indexing(imdb)
          
     elif args.action == 'bench':
+        #Esecuzione del benchmark
         #leggo il file di benchmark
         with args.file as fd:
             suite = parse_suite(fd)
-        res,topk = evaluate(suite,pomodoro,imdb) #estraggo i per ogni query i documenti rilevanti e il suo ranking dei risultati uniti
+        res,tok = evaluate(suite,pomodoro,imdb) 
+        #estraggo i per ogni query i documenti rilevanti con tutti i suoi risultati 
         
         avg_precisions = []
         interp_precisions = [0] * 10
         
-        j = 0
         for el in res:
+            #Eseguo le stampe e i calcoli per i benchmark di ogni singola query
             print(f"{el.query.query} : {[x.relevance for x in el.query.scores]} {el.results_point}")
-            
-            # schema = input("Inserire il tipo di ritorno si vuole visualizzare (default-invio- -> \"title\", altrimenti inserisci)")
-            # #schema = ""
-            # if schema == "":
-            #     niceprint(topk[j], "title")
-            # else:
-            #     niceprint(topk[j], schema)
-            # #---------------------------
+
 
             # DCG = r1 + r2/log_2(2) + r3/log_3(3) etc ...
             val = BenchmarkResult.compute_discounted_cumulative_gain(el.results_point)
@@ -320,7 +341,6 @@ def main():
             else:
                 print("Nessun risultato ottenuto")
             print("\n")
-            j += 1
 
         print('====================================================')
         mean_avg = sum(avg_precisions)/len(res)
@@ -329,47 +349,31 @@ def main():
         print("AVERAGE STANDARD PRECISION: ")
         values = [value/len(interp_precisions) for key, value in enumerate(interp_precisions)]
         print("\n".join([f"lv. {(key + 1) / 10} value {value / len(interp_precisions)}" for key, value in enumerate(interp_precisions)]))
-        ri = input("Inserire s per visualizzare il grafico (altrimenti qualsiasi altra stringa per andare oltre): ")
+        ri = input("Inserire il carattere 's' per visualizzare il grafico (altrimenti qualsiasi altra stringa per andare oltre): ")
         if ri == "s":
             try:
                 plot(np.arange(0,1.0,0.1), values)
             except:
-                print("pacchetto python3-tk mancante, serve per la stampa del grafico")
+                print("Pacchetto python3-tk mancante, serve per la stampa del grafico")
         else:
             print("Il grafico non verrà stampato, Grazie e arrivederci")
 
     else:
-        searchPOM = pomodoro.ix.searcher()
-        searchIMD = imdb.ix.searcher()
-
-        p = create_parser(pomodoro)
-        query_txt = bytearray(input('Inserire la query --> ').encode()).decode('utf-8')
-        query = re.sub(r"\s+[1I]$", "", query_txt.strip())
+        #Esecuzione singola query
+        query_txt = input('Inserire la query --> ')
+        k = input("inserire il limite di match (default - invio - 5, altrimenti il tuo numero):")
         try:
-            query = p.parse(query_txt)
+            k = int(k)
+        except:
+            k = 5
+
+        try:
+            niceprint(run_query(query_txt, pomodoro, imdb, k, True))
         except:
             if 'reviews' in query_txt:
                 print("Non puoi cercare una recensione")
             else:
                 print("Query non valida")
             quit()
-
-               
-        k = input("inserire il limite di match (default - invio - 5, altrimenti il tuo numero):")
-        if k == "":
-            k = 5
-            resultPOM = searchPOM.search(query, terms=True, limit=k)
-            resultIMD = searchIMD.search(query, terms=True, limit=k)
-
-            print("POMODORO")
-            printInformation(resultPOM)
-            print("----------------------------")
-            print("IMDB")
-            printInformation(resultIMD)
-        
-            niceprint(searchInIndex(query, searchPOM, searchIMD))
-        else:
-            niceprint(searchInIndex(query, searchPOM, searchIMD, int(k)))
-
 
 main()
