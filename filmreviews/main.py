@@ -39,12 +39,7 @@ def plot(x,y):
 def niceprint(top_k, p="default"):
     '''
     Questa funzione stampa il contenuto dei risultati della query, e fa il merge delle due soluzioni
-    #trama più lubnga
-    #recensioni metto assieme
-    #durata 1 sola
-    #genere (soluzione bonus)
-    #attori e cast, regista(soluzione bonus)
-    prende in input top_k, il contenuto con rank più alto, ed una p il nome del contenuto da stampare, se è default li stampa tutti
+    prende in input top_k,  ed una p ovvero il nome del contenuto da stampare, se è default li stampa tutti
     '''
     
     print()
@@ -96,7 +91,7 @@ def replaceReviews(s):
 def mergeSameHit(hitlist):
     
     '''
-    prende in input una lista di 
+    prende in input un risultato, dato dal topk, ed esegue il merge dei due indici
     '''
 
     if(len(hitlist)==1):
@@ -157,7 +152,7 @@ def printInformation(result):
 
 def run_query(query_txt, pomodoro,imdb, k: int = 5, searchSingle = False):
     '''
-    Questa funzione, esegue la query in ingresso, e ritorna il topk ovvero la lista dei risultati della query con il merge.
+    la funzione prende in input una query che la esegue per entrambi gli indici, e tramite l'algoritmo Threshold, viene generato un unico ranking di risultati.
     prende in ingresso l'indice di tomatoes, imdb, un valore numerico, la stringa con la query, ed un boolean per la richiesta della stampa del singolo indice (prima tomatoes e poi imdb)
     '''
     searchPOM = pomodoro.ix.searcher()
@@ -191,7 +186,8 @@ def create_parser(idx):
             'content':2,
     }
     '''
-    Returns a QueryParser configured to search in multiple fields. (documentazione whoosh)
+    (documentazione whoosh)
+    Returns a QueryParser configured to search in multiple fields. 
     Instead of assigning unfielded clauses to a default field, this parser transforms them 
     into an OR clause that searches a list of fields. For example, if the list of multi-fields is 
     “f1”, “f2” and the query string is “hello there”, the class will parse “(f1:hello OR f2:hello) 
@@ -205,8 +201,8 @@ def create_parser(idx):
 
 def evaluate(suite,pomodoro, imdb):
     '''
-    la valutazione dei benchmark, sulle proposte fatte sul file, query_benchmark, confronta con i suoi risultati ed inserisce 0 se non trova la corrispondenza
-    altrimenti inserisce il numero proposto
+    Questa funzione estrapola la rilevanza per i risultati rispetto alle query proposte dal file query_benchmark (questa è la lista suite in input).
+    li restituisce in una lista chiamata res, con le rilevanze, con il top_k.
     '''
     res = []
     topk = []
